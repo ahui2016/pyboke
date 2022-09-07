@@ -11,6 +11,7 @@ classifiers = ["License :: OSI Approved :: MIT License"]
 dependencies = [
   "arrow",
   "click",
+  "jinja2",
 ]
 requires-python = ">=3.10"
 dynamic = ["version", "description"]

@@ -1,0 +1,8 @@
+name = '''{{}}'''  # [必填] 博客名称
+author = '''{{}}'''  # [必填] 博客作者
+home_recent_maxint = {{}}  # [必填] 首页 "最近文章" 列表中的项目上限
+website = '''{{}}'''  # [必填] 博客网址，用于 RSS feed
+rss_link = '''{{}}'''  # RSS feed 的网址 [一般根据 website 自动生成]
+uuid = '''{{}}'''  # [一般不手动修改] 用于 RSS feed 的 uuid
+rss_updated = '''{{}}'''  # [一般不手动修改] 上次生成 RSS feed 的时间
+blog_updated = '''{{}}'''  # [一般不手动修改] 博客更新日期，如果大于 rss_updated 就要重新生成 RSS

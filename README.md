@@ -1,4 +1,4 @@
-# pyboke
+# PyBoke
 
 Static Blog Generator (极简博客生成器)
 

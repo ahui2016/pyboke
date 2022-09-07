@@ -1,5 +1,8 @@
 import os
 
+from pyboke.model import Blog_Paths, default_blog_cfg, Blog_Config_Path
+from pyboke.tmpl_render import render_blog_config
+
 
 def dir_not_empty(path):
     return True if os.listdir(path) else False
@@ -18,3 +21,7 @@ def init_blog(path):
     """
     if dir_not_empty(path):
         return f"Error. Folder Not Empty: {path}"
+
+    make_folders(Blog_Paths)
+    render_blog_config(default_blog_cfg())
+    print(f"请用文本编辑器打开 {Blog_Config_Path} 填写博客名称、作者名称等。")

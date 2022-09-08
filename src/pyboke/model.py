@@ -55,4 +55,4 @@ class ArticleConfig:
     author: str  # 文章作者，留空则采用 BlogConfig.author
     ctime: str  # 文章创建时间
     mtime: str  # 文章修改时间
-    checksum: str  # 用来判断文章内容有无变更
+    checksum: str  # sha1, 用来判断文章内容有无变更

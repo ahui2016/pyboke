@@ -1,11 +1,13 @@
+import hashlib
 import os
 import shutil
 from pathlib import Path
 
 import tomli
 
+from . import model
 from .model import Blog_Config_Path, CWD, Templates_Folder_Name, Articles_Folder_Path, \
-    Templates_Folder_Path, Output_Folder_Path, BlogConfig, Pics_Folder_Path
+    Templates_Folder_Path, Output_Folder_Path, BlogConfig, Pics_Folder_Path, RSS_Atom_XML
 from .tmpl_render import render_blog_config
 
 
@@ -59,12 +61,37 @@ def ensure_blog_config():
     data = tomli_loads(Blog_Config_Path)
     cfg = BlogConfig(**data)
     default_cfg = BlogConfig.default()
-    if cfg.name == default_cfg.name:
+
+    cfg.name = cfg.name.strip()
+    if not cfg.name or cfg.name == default_cfg.name:
         return f"请用文本编辑器打开 {Blog_Config_Path} 填写博客名称"
-    if cfg.author == default_cfg.author:
+
+    cfg.author = cfg.author.strip()
+    if not cfg.author or cfg.author == default_cfg.author:
         return f"请用文本编辑器打开 {Blog_Config_Path} 填写作者名称"
-    if cfg.home_recent_max <= 0:
+
+    if not cfg.home_recent_max or cfg.home_recent_max <= 0:
         return f"请用文本编辑器打开 {Blog_Config_Path} 填写 home_recent_max, 必须大于零"
+
+    changed = False
+
+    cfg.website = cfg.website.strip()
+    if cfg.website and cfg.website != default_cfg.website:
+        rss_link = cfg.website.removesuffix("/") + "/" + RSS_Atom_XML
+        if cfg.rss_link != rss_link:
+            cfg.rss_link = rss_link
+            changed = True
+
+    cfg.uuid = cfg.uuid.strip()
+    if not cfg.uuid:
+        cfg.uuid = hashlib.sha1(
+            (cfg.name + cfg.author + str(model.now())).encode()
+        ).hexdigest()
+        changed = True
+
+    if changed:
+        render_blog_config(cfg)
+
     return False
 
 

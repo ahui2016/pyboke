@@ -1,6 +1,6 @@
 import click
 
-from src.pyboke import (
+from . import (
     __version__,
     __package_name__,
     util,
@@ -34,6 +34,14 @@ def cli(ctx):
 ############
 # 以下是子命令
 
+def check_initialization(ctx):
+    if not util.blog_file_folders_exist():
+        print("请先进入博客根目录，或使用 'boke init' 命令新建博客")
+        ctx.exit()
+    if err := util.ensure_blog_config():
+        print(err)
+        ctx.exit()
+
 
 @cli.command(context_settings=CONTEXT_SETTINGS, name="init")
 @click.pass_context
@@ -42,8 +50,23 @@ def init_command(ctx):
 
     初始化博客。请在一个空文件夹内执行 'boke init'。
     """
-    cwd = util.cwd()
-    if util.dir_not_empty(cwd):
-        print(f"Error. Folder Not Empty: {cwd}")
+
+    if err := util.init_blog():
+        print(err)
         ctx.exit()
+
+
+@cli.command(context_settings=CONTEXT_SETTINGS)
+@click.argument("filename", nargs=1, type=click.Path(exists=True))
+@click.pass_context
+def post(ctx, filename):
+    """Post an article. (发表文章)
+
+    Example: boke post ./articles/abc.md
+    """
+    check_initialization(ctx)
+    if not util.article_in_articles(filename):
+        print(f"不在 articles 文件夹内: {filename}")
+        ctx.exit()
+    print(filename)
 

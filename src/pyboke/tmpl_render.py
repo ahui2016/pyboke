@@ -1,15 +1,9 @@
 import jinja2
 
-from src.pyboke.model import (
-    CWD,
-    Blog_Paths,
-    Templates_Folder_Name,
-    RSS_Atom_XML,
-    Blog_Config_Filename, Blog_Config_Path,
-)
+from .model import RSS_Atom_XML, Blog_Config_Filename, Blog_Config_Path, Templates_Folder_Path
 
 
-loader = jinja2.FileSystemLoader(Blog_Paths[Templates_Folder_Name])
+loader = jinja2.FileSystemLoader(Templates_Folder_Path)
 jinja_env = jinja2.Environment(
     loader=loader, autoescape=jinja2.select_autoescape()
 )

@@ -1,8 +1,28 @@
-name = '''{{cfg.name}}'''  # [必填] 博客名称
-author = '''{{cfg.author}}'''  # [必填] 博客作者
-home_recent_max = {{cfg.home_recent_max}}  # [必填] 首页 "最近文章" 列表中的项目上限
-website = '''{{cfg.website}}'''  # [必填] 博客网址，用于 RSS feed
-rss_link = '''{{cfg.rss_link}}'''  # RSS feed 的网址 [一般根据 website 自动生成]
-uuid = '''{{cfg.uuid}}'''  # [一般不手动修改] 用于 RSS feed 的 uuid
-rss_updated = '''{{cfg.rss_updated}}'''  # [一般不手动修改] 上次生成 RSS feed 的时间
-blog_updated = '''{{cfg.blog_updated}}'''  # [一般不手动修改] 博客更新日期，如果大于 rss_updated 就要重新生成 RSS
+# 本文件采用 TOML 格式 https://toml.io/
+
+# [必填] 博客名称
+name = '''{{cfg.name}}'''
+
+# [必填] 博客作者
+author = '''{{cfg.author}}'''
+
+# [必填] 首页 "最近文章" 列表中的项目上限
+home_recent_max = {{cfg.home_recent_max}}
+
+# [必填] 博客网址，用于 RSS feed
+website = '''{{cfg.website}}'''
+
+# 请填写以上项目
+# 以下项目一般由程序自动填写，不需要手动操作
+
+# RSS feed 的网址 [一般根据 website 自动生成]
+rss_link = '''{{cfg.rss_link}}'''
+
+# [一般不手动修改] 用于 RSS feed 的 uuid
+uuid = '''{{cfg.uuid}}'''
+
+# [一般不手动修改] 上次生成 RSS feed 的时间
+rss_updated = '''{{cfg.rss_updated}}'''
+
+# [一般不手动修改] 博客更新日期，如果大于 rss_updated 就要重新生成 RSS
+blog_updated = '''{{cfg.blog_updated}}'''

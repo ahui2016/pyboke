@@ -1,8 +1,10 @@
+import hashlib
 import re
 from dataclasses import dataclass
 from pathlib import Path
 
 import arrow
+import tomli
 
 RFC3339 = "YYYY-MM-DD HH:mm:ssZZ"
 Blog_Config_Filename = "blog.toml"
@@ -11,6 +13,7 @@ Pics_Folder_Name = "pics"
 Output_Folder_Name = "output"
 Templates_Folder_Name = "templates"
 HTML_Suffix = ".html"
+TOML_Suffix = ".toml"
 MD_Suffix = ".md"
 RSS_Atom_XML = "atom.xml"
 
@@ -22,7 +25,7 @@ Pics_Folder_Path = Articles_Folder_Path.joinpath(Pics_Folder_Name)
 Blog_Config_Path = CWD.joinpath(Blog_Config_Filename)
 
 # 文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线)。
-Filename_Forbid_Pattern = re.compile(r"[^_0-9a-zA-Z\-]")
+Filename_Forbid_Pattern = re.compile(r"[^._0-9a-zA-Z\-]")
 Markdown_Title_Pattern = re.compile(r"^(#{1,6}|>|1.|-|\*) (.+)")
 
 
@@ -56,6 +59,12 @@ class BlogConfig:
             blog_updated=now(),
         )
 
+    @classmethod
+    def loads(cls):
+        """Loads BlogConfig from Blog_Config_Path"""
+        data = tomli_loads(Blog_Config_Path)
+        return BlogConfig(**data)
+
 
 @dataclass
 class ArticleConfig:
@@ -64,6 +73,52 @@ class ArticleConfig:
     ctime: str  # 文章创建时间
     mtime: str  # 文章修改时间
     checksum: str  # sha1, 用来判断文章内容有无变更
+
+    @classmethod
+    def from_md_file(cls, md_file, title_length):
+        with open(md_file, "rb") as f:
+            data = f.read()
+            first_line = get_first_line(data)
+            title = get_md_title(first_line, title_length)
+            checksum = hashlib.sha1(data).hexdigest()
+            ctime = now()
+            return ArticleConfig(
+                title=title,
+                author="",
+                ctime=ctime,
+                mtime=ctime,
+                checksum=checksum
+            )
+
+    @classmethod
+    def loads(cls, file):
+        """Loads ArticleConfig from an article.toml file."""
+        data = tomli_loads(file)
+        return ArticleConfig(**data)
+
+
+def tomli_loads(file) -> dict:
+    """正确处理 utf-16"""
+    with open(file, "rb") as f:
+        text = f.read()
+        try:
+            text = text.decode()  # Default encoding is 'utf-8'.
+        except UnicodeDecodeError:
+            text = text.decode("utf-16").encode().decode()
+        return tomli.loads(text)
+
+
+def get_first_line(file):
+    """
+    :param file: bytes
+    :return: str, 注意有可能返回空字符串。
+    """
+    lines = file.decode()
+    for line in lines:
+        line = line.strip()
+        if line:
+            return line
+    return ""
 
 
 def byte_len(s: str) -> int:
@@ -89,10 +144,14 @@ def utf8_byte_truncate(text: str, max_bytes: int) -> str:
 
 
 def check_filename(name: str):
+    """
+    :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
+    """
     if Filename_Forbid_Pattern.search(name) is None:
         return False
     else:
-        return "文件名只可以由 0-9 a-z A-Z 以及下划线、短横线组成"
+        return "文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线), .(点)" \
+               "\n(注意：不能使用空格，请用下划线或短横线代替空格)"
 
 
 def get_md_title(md_first_line: str, max_bytes: int) -> str:

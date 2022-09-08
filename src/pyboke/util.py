@@ -37,17 +37,6 @@ def init_blog():
     print(f"请用文本编辑器打开 {Blog_Config_Path} 填写博客名称、作者名称等。")
 
 
-def tomli_loads(file) -> dict:
-    """正确处理 utf-16"""
-    with open(file, "rb") as f:
-        text = f.read()
-        try:
-            text = text.decode()  # Default encoding is 'utf-8'.
-        except UnicodeDecodeError:
-            text = text.decode("utf-16").encode().decode()
-        return tomli.loads(text)
-
-
 def blog_file_folders_exist():
     return Articles_Folder_Path.exists()\
         and Pics_Folder_Path.exists()\
@@ -59,8 +48,7 @@ def ensure_blog_config():
     """
     :return: 发生错误时返回 (err_msg, None), 没有错误则返回 (False, BlogConfig)
     """
-    data = tomli_loads(Blog_Config_Path)
-    cfg = BlogConfig(**data)
+    cfg = BlogConfig.loads()
     default_cfg = BlogConfig.default()
 
     cfg.name = cfg.name.strip()
@@ -99,23 +87,13 @@ def ensure_blog_config():
     return False, cfg
 
 
-def article_in_articles(filename):
-    return Path(filename).parent.samefile(Articles_Folder_Path)
-
-
-def get_first_line(file):
+def check_filename(filename):
     """
-    :return: str, 注意有可能返回空字符串。
+    :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
     """
-    with open(file, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                return line
-    return ""
-
-
-def get_md_file_title(file, max_bytes):
-    line = get_first_line(file)
-    return model.get_md_title(line, max_bytes)
-
+    file = Path(filename)
+    if err := model.check_filename(file.name):
+        return err
+    if not file.parent.samefile(Articles_Folder_Path):
+        return f"不在 articles 文件夹内: {filename}"
+    return False

@@ -22,11 +22,11 @@ website = '''{{cfg.website}}'''
 rss_link = '''{{cfg.rss_link}}'''
 
 # [一般不手动修改] 用于 RSS feed 的 uuid
-uuid = '''{{cfg.uuid}}'''
+uuid = '{{cfg.uuid}}'
 
 # [一般不手动修改] 上次生成 RSS feed 的时间
-rss_updated = '''{{cfg.rss_updated}}'''
+rss_updated = '{{cfg.rss_updated}}'
 
 # [一般不手动修改] 博客更新日期，如果大于 rss_updated 就要重新生成 RSS
-blog_updated = '''{{cfg.blog_updated}}'''
+blog_updated = '{{cfg.blog_updated}}'
 

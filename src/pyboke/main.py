@@ -5,7 +5,8 @@ from . import (
     __package_name__,
     util,
 )
-from .model import BlogConfig
+from .model import BlogConfig, ArticleConfig
+from .tmpl_render import render_article_config
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -70,9 +71,15 @@ def post(ctx, filename):
 
     Example: boke post ./articles/abc.md
     """
-    cfg = check_initialization(ctx)
-    if not util.article_in_articles(filename):
-        print(f"Error: 不在 articles 文件夹内: {filename}")
+    if err := util.check_filename(filename):
+        print(f"Error: {err}")
         ctx.exit()
-    title = util.get_md_file_title(filename, cfg.title_length_max)
-    print(f"Article Title: {title}")
+
+    cfg = check_initialization(ctx)
+    art = ArticleConfig.from_md_file(filename, cfg.title_length_max)
+    if not art.title:
+        print(f"Error: 无法获取文章标题，请修改文章的标题(文件的第一行内容)")
+        ctx.exit()
+
+    print(f"Article: {art}")
+    render_article_config(filename, art, force=False)

@@ -23,10 +23,11 @@ def copy_templates():
 def init_blog():
     """
     在一个空文件夹中初始化一个博客。
+
     :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
     """
     if dir_not_empty(CWD):
-        return f"Error. Folder Not Empty: {CWD}"
+        return f"Folder Not Empty: {CWD}"
 
     Articles_Folder_Path.mkdir()
     Pics_Folder_Path.mkdir()
@@ -56,7 +57,7 @@ def blog_file_folders_exist():
 
 def ensure_blog_config():
     """
-    :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
+    :return: 发生错误时返回 (err_msg, None), 没有错误则返回 (False, BlogConfig)
     """
     data = tomli_loads(Blog_Config_Path)
     cfg = BlogConfig(**data)
@@ -64,14 +65,17 @@ def ensure_blog_config():
 
     cfg.name = cfg.name.strip()
     if not cfg.name or cfg.name == default_cfg.name:
-        return f"请用文本编辑器打开 {Blog_Config_Path} 填写博客名称"
+        return f"请用文本编辑器打开 {Blog_Config_Path} 填写博客名称", None
 
     cfg.author = cfg.author.strip()
     if not cfg.author or cfg.author == default_cfg.author:
-        return f"请用文本编辑器打开 {Blog_Config_Path} 填写作者名称"
+        return f"请用文本编辑器打开 {Blog_Config_Path} 填写作者名称", None
 
-    if not cfg.home_recent_max or cfg.home_recent_max <= 0:
-        return f"请用文本编辑器打开 {Blog_Config_Path} 填写 home_recent_max, 必须大于零"
+    if cfg.home_recent_max <= 0:
+        return f"请用文本编辑器打开 {Blog_Config_Path} 填写 home_recent_max, 必须大于零", None
+
+    if cfg.home_recent_max <= 0:
+        return f"请用文本编辑器打开 {Blog_Config_Path} 填写 title_length_max, 必须大于零", None
 
     changed = False
 
@@ -92,8 +96,26 @@ def ensure_blog_config():
     if changed:
         render_blog_config(cfg)
 
-    return False
+    return False, cfg
 
 
 def article_in_articles(filename):
     return Path(filename).parent.samefile(Articles_Folder_Path)
+
+
+def get_first_line(file):
+    """
+    :return: str, 注意有可能返回空字符串。
+    """
+    with open(file, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                return line
+    return ""
+
+
+def get_md_file_title(file, max_bytes):
+    line = get_first_line(file)
+    return model.get_md_title(line, max_bytes)
+

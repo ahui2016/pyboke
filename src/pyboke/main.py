@@ -5,6 +5,7 @@ from . import (
     __package_name__,
     util,
 )
+from .model import BlogConfig
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -34,13 +35,18 @@ def cli(ctx):
 ############
 # 以下是子命令
 
-def check_initialization(ctx):
+def check_initialization(ctx) -> BlogConfig:
+    """
+    :return: 没有错误时返回 BlogConfig, 出错时直接退出程序。
+    """
     if not util.blog_file_folders_exist():
         print("请先进入博客根目录，或使用 'boke init' 命令新建博客")
         ctx.exit()
-    if err := util.ensure_blog_config():
+    err, cfg = util.ensure_blog_config()
+    if err:
         print(err)
         ctx.exit()
+    return cfg
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS, name="init")
@@ -64,9 +70,9 @@ def post(ctx, filename):
 
     Example: boke post ./articles/abc.md
     """
-    check_initialization(ctx)
+    cfg = check_initialization(ctx)
     if not util.article_in_articles(filename):
-        print(f"不在 articles 文件夹内: {filename}")
+        print(f"Error: 不在 articles 文件夹内: {filename}")
         ctx.exit()
-    print(filename)
-
+    title = util.get_md_file_title(filename, cfg.title_length_max)
+    print(f"Article Title: {title}")

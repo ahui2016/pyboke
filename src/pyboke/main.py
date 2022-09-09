@@ -59,7 +59,6 @@ def init_command(ctx):
 
     初始化博客。请在一个空文件夹内执行 'boke init'。
     """
-
     if err := util.init_blog():
         print(err)
         ctx.exit()

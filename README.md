@@ -19,6 +19,8 @@ Static Blog Generator (极简博客生成器)
 
 - articles (文章文件 (markdown 格式, .md 后缀名) 请放在这里)
 - articles/pics (供 markdown 文件使用的本地图片)
+- articles/metadata (与 markdown 文件一一对应的 toml 文件)
+- drafts (待发布的草稿放在这里)
 - output (程序生成的 HTML, RSS 等文件将会输出到该文件夹)
 - templates (Jinja2模板 与 CSS文件)
 - boke.toml (博客名称、作者名称等等)
@@ -33,8 +35,10 @@ Static Blog Generator (极简博客生成器)
 - 文件后缀必须是 ".md", 文件内容必须采用 Markdown 格式, 必须采用 utf-8 编码。
 - 文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线), .(点)。
 - 把 md 文件放入 articles 文件夹，执行 `boke render articles/filename`,
-  会在 metadata 文件夹自动生成 toml 文件，并给出提示信息。
-- 新文章的 toml 里有 ctime, mtime, hash, 如果文件 hash 发生变化就更新 mtime
+  会在 **articles/metadata** 文件夹里生成 TOML 文件，
+  在 **output** 文件夹生成 HTML 文件。
+- 其中, TOML 里有文章的标题、作者、创建日期、修改日期等信息。
+- 大多数情况下你都可以忘记 articles/metadata 里的 toml 文件，不需要修改它。
 
 ## 修改文章内容
 
@@ -52,10 +56,14 @@ Static Blog Generator (极简博客生成器)
 使用前述的 `boke render` 命令时，如果文章内容无变化，会自动忽略。  
 也就是说，如果只修改 toml 的内容，不修改 markdown 文件的内容，就不会触发渲染处理。
 
-因此，如果想在不修改文章内容的情况下，修改文章的作者或日期，就需要强制渲染。
+因此，如果想在不修改文章内容的情况下，修改文章的作者或日期，就需要强制渲染。  
+（大多数情况下不需要手动修改 toml 文件的内容）
 
 - `boke render -force articles/filename` 强制渲染指定的一篇文章。
 - `boke render -force -all` 强制渲全部文章。
+
+大多数情况下不需要强制渲染，但有一种情况：修改了 blog.toml 里的博客名称、作者名称
+等信息后，需要执行 `boke render -force -all` 强制渲全部文章。
 
 ## 删除文章
 
@@ -63,3 +71,25 @@ Static Blog Generator (极简博客生成器)
 
 1. 直接删除 articles 文件夹里的文件，然后执行 `boke render -all`
 2. 使用命令 `boke delete articles/filename`
+
+## 草稿
+
+如上文所示，添加文章只需要把 markdown 文件放进 articles 文件夹即可，
+操作非常简单明瞭。
+
+但考虑到有时文章写到一半不想发布，需要一个存放草稿的地方，因此提供了一个
+drafts 文件夹，草稿可以放在这里。（但其实草稿放在硬盘里的其它文件夹也行，
+这个 drafts 文件夹只是提供方便，并非强制要求）
+
+### `boke new drafts/abc.md`
+
+该命令用来新建一个 markdown 文件，并确保其采用 UTF-8 编码。  
+这个命令也只是提供方便，你完全可以不使用该命令，而是自己用其它方法创建文件。
+
+### `boke post drafts/abc.md`
+
+该命令的作用是把 drafts 文件夹里的指定文件移动到 articles 文件夹里，并对其执行渲染
+(生成 toml 和 html 文件)。
+
+这个命令也只是提供方便，你完全可以不使用该命令，而是自己移动文件，然后自己执行
+`boke render` 命令。

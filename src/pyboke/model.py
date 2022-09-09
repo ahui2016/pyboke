@@ -8,8 +8,10 @@ import tomli
 
 RFC3339 = "YYYY-MM-DD HH:mm:ssZZ"
 Blog_Config_Filename = "blog.toml"
+Drafts_Folder_Name = "drafts"
 Articles_Folder_Name = "articles"
 Pics_Folder_Name = "pics"
+Metadata_Folder_Name = "metadata"
 Output_Folder_Name = "output"
 Templates_Folder_Name = "templates"
 HTML_Suffix = ".html"
@@ -18,10 +20,12 @@ MD_Suffix = ".md"
 RSS_Atom_XML = "atom.xml"
 
 CWD = Path.cwd().resolve()
+Drafts_Folder_Path = CWD.joinpath(Drafts_Folder_Name)
 Articles_Folder_Path = CWD.joinpath(Articles_Folder_Name)
+Pics_Folder_Path = Articles_Folder_Path.joinpath(Pics_Folder_Name)
+Metadata_Folder_Path = Articles_Folder_Path.joinpath(Metadata_Folder_Name)
 Output_Folder_Path = CWD.joinpath(Output_Folder_Name)
 Templates_Folder_Path = CWD.joinpath(Templates_Folder_Name)
-Pics_Folder_Path = Articles_Folder_Path.joinpath(Pics_Folder_Name)
 Blog_Config_Path = CWD.joinpath(Blog_Config_Filename)
 
 # 文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线)。

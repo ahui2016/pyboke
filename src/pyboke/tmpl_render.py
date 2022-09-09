@@ -4,7 +4,7 @@ import jinja2
 
 from . import model
 from .model import RSS_Atom_XML, Blog_Config_Filename, Blog_Config_Path, \
-    Templates_Folder_Path, TOML_Suffix, ArticleConfig
+    Templates_Folder_Path, TOML_Suffix, ArticleConfig, Metadata_Folder_Path
 
 loader = jinja2.FileSystemLoader(Templates_Folder_Path)
 jinja_env = jinja2.Environment(
@@ -42,7 +42,7 @@ def render_article(md_file: Path, title_length: int, force: bool):
     if not art_cfg_new.title:
         return "无法获取文章标题，请修改文章的标题(文件的第一行内容)"
 
-    art_toml_path = md_file.with_suffix(TOML_Suffix)
+    art_toml_path = art_cfg_path_from_md_path(md_file)
     need_to_render = False
 
     # article toml 不存在，以 art_cfg_new 为准
@@ -70,7 +70,13 @@ def render_article(md_file: Path, title_length: int, force: bool):
 
     # 需要渲染 html
     if need_to_render or force:
+        print("render_article_html")
         render_article_html(md_file, art_cfg)
 
     return False
 
+
+def art_cfg_path_from_md_path(md_path):
+    """根据 markdown 文件的路径得出 toml 文件的路径"""
+    name = md_path.with_suffix(TOML_Suffix).name
+    return Metadata_Folder_Path.joinpath(name)

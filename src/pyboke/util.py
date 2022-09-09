@@ -3,8 +3,6 @@ import os
 import shutil
 from pathlib import Path
 
-import tomli
-
 from . import model
 from .model import Blog_Config_Path, CWD, Templates_Folder_Name, Articles_Folder_Path, \
     Templates_Folder_Path, Output_Folder_Path, BlogConfig, Pics_Folder_Path, RSS_Atom_XML

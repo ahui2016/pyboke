@@ -1,6 +1,6 @@
 import hashlib
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from pathlib import Path
 
 import arrow
@@ -96,6 +96,10 @@ class ArticleConfig:
         data = tomli_loads(file)
         return ArticleConfig(**data)
 
+    def copy(self):
+        """Make a copy."""
+        return ArticleConfig(**asdict(self))
+
 
 def tomli_loads(file) -> dict:
     """正确处理 utf-16"""
@@ -114,7 +118,7 @@ def get_first_line(file):
     :return: str, 注意有可能返回空字符串。
     """
     lines = file.decode()
-    for line in lines:
+    for line in lines.splitlines():
         line = line.strip()
         if line:
             return line
@@ -151,7 +155,7 @@ def check_filename(name: str):
         return False
     else:
         return "文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线), .(点)" \
-               "\n(注意：不能使用空格，请用下划线或短横线代替空格)"
+               "\n注意：不能使用空格，请用下划线或短横线代替空格。"
 
 
 def get_md_title(md_first_line: str, max_bytes: int) -> str:

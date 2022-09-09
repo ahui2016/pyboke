@@ -32,30 +32,34 @@ Static Blog Generator (极简博客生成器)
 
 - 文件后缀必须是 ".md", 文件内容必须采用 Markdown 格式, 必须采用 utf-8 编码。
 - 文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线), .(点)。
-- 把 md 文件放入 articles 文件夹，执行 `boke post`,
+- 把 md 文件放入 articles 文件夹，执行 `boke render articles/filename`,
   会在 metadata 文件夹自动生成 toml 文件，并给出提示信息。
 - 新文章的 toml 里有 ctime, mtime, hash, 如果文件 hash 发生变化就更新 mtime
 
 ## 修改文章内容
 
 - 直接修改 articles 里的 md 文件。
-- 然后执行 `boke update articles/filename` 指定更新一个文件。
-- 也可执行 `boke update all` 自动检查每一个文件是否被修改过，并且更新。
+- 然后执行 `boke render articles/filename`, 即可自动更新指定文件的 toml 和 html
+- 该命令与前面所述 "添加文章" 的命令是一样的，作用都是渲染 toml 和 html
 
-## 只更新日期
+## 批量处理
 
-如果文章内容无变化，只更新 mtime, 有两种方法:
+- 执行 `boke render -all` 可自动检查全部文件是否被修改过，如有则更新其 toml 和 html
+  (如有新文章，也会自动生成 toml 和 html)。
 
-1. 修改 toml 文件里的 mtime, 然后执行 `boke update articles/filename`
-   强制重新生成 HTML。
-2. 不修改 toml, 直接执行 `boke updateMtimeNow articles/filename`
-   会自动将 mtime 修改为当前时间，并重新生成 HTML。
+## 强制渲染
 
-其中第 1 种方法也可用来修改 ctime 及其他信息。
+使用前述的 `boke render` 命令时，如果文章内容无变化，会自动忽略。  
+也就是说，如果只修改 toml 的内容，不修改 markdown 文件的内容，就不会触发渲染处理。
+
+因此，如果想在不修改文章内容的情况下，修改文章的作者或日期，就需要强制渲染。
+
+- `boke render -force articles/filename` 强制渲染指定的一篇文章。
+- `boke render -force -all` 强制渲全部文章。
 
 ## 删除文章
 
 有两种方法：
 
-1. 直接删除 articles 文件夹里的文件，然后执行 `boke update all`
+1. 直接删除 articles 文件夹里的文件，然后执行 `boke render -all`
 2. 使用命令 `boke delete articles/filename`

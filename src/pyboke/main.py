@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import click
 
 from . import (
@@ -5,8 +7,8 @@ from . import (
     __package_name__,
     util,
 )
-from .model import BlogConfig, ArticleConfig
-from .tmpl_render import render_article_config
+from .model import BlogConfig
+from .tmpl_render import render_article
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -65,21 +67,30 @@ def init_command(ctx):
 
 @cli.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("filename", nargs=1, type=click.Path(exists=True))
+@click.option(
+    "force",
+    "-force",
+    is_flag=True,
+    default=False,
+    help="强制渲染HTML"
+)
 @click.pass_context
-def post(ctx, filename):
-    """Post an article. (发表文章)
+def render(ctx, filename, force):
+    """Render an article. (渲染文章的 toml 和 html)
 
-    Example: boke post ./articles/abc.md
+    Examples:
+
+    boke render ./articles/abc.md
+
+    boke render -force ./articles/abcd.md
+
+    boke render -all
     """
     if err := util.check_filename(filename):
         print(f"Error: {err}")
         ctx.exit()
 
     cfg = check_initialization(ctx)
-    art = ArticleConfig.from_md_file(filename, cfg.title_length_max)
-    if not art.title:
-        print(f"Error: 无法获取文章标题，请修改文章的标题(文件的第一行内容)")
+    if err := render_article(Path(filename), cfg.title_length_max, force):
+        print(f"Error: {err}")
         ctx.exit()
-
-    print(f"Article: {art}")
-    render_article_config(filename, art, force=False)

@@ -1,0 +1,81 @@
+header {
+  text-align: center;
+}
+
+a {
+  text-decoration: none;
+}
+
+img {
+  max-width: 60%;
+  height: auto;
+}
+
+.small {
+  font-size: small;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+
+.FeedInfo {
+  text-align: right;
+  font-size: small;
+  margin-bottom: 1.5rem;
+}
+
+.FeedEntry {
+  margin-bottom: 1.5rem;
+  word-wrap: break-word;
+  /* word-break: break-all; */
+}
+
+.EntryTitle {
+  color: gray;
+  font-size: small;
+}
+
+.NavButtons {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.NavButtons a + a{
+  margin-left: 1rem;
+}
+
+.Tags,
+.Categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+}
+
+.art-info {
+  font-size: small;
+  margin-top: 5rem;
+}
+.footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  /* margin-bottom: 5rem; */
+  padding-top: 1.5rem;
+  border-top: 1px solid #ccc;
+}
+
+.author-date {
+  text-align: right;
+}
+
+footer {
+  text-align: center;
+  font-size: small;
+  margin-top: 3rem; 
+  margin-bottom: 1.5rem; 
+  padding-top: 1.5rem;
+  border-top: 1px solid #ccc;
+}

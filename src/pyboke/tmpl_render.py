@@ -1,10 +1,12 @@
+import os
+import shutil
 from pathlib import Path
 
 import jinja2
 
 from . import model
 from .model import RSS_Atom_XML, Blog_Config_Filename, Blog_Config_Path, \
-    Templates_Folder_Path, TOML_Suffix, ArticleConfig, Metadata_Folder_Path, Draft_TMPL_Name
+    Templates_Folder_Path, TOML_Suffix, ArticleConfig, Metadata_Folder_Path, Draft_TMPL_Name, Output_Folder_Path
 
 loader = jinja2.FileSystemLoader(Templates_Folder_Path)
 jinja_env = jinja2.Environment(
@@ -24,6 +26,23 @@ tmplfile = dict(
 )
 
 
+def set_current_theme(name):
+    theme_filename = f"{name.lower()}.theme"
+    theme_filepath = Output_Folder_Path.joinpath(theme_filename)
+
+def get_current_theme():
+
+
+
+def copy_static_files():
+    static_files = Templates_Folder_Path.glob("*")
+    for src in static_files:
+        if src.is_file() and src.name not in tmplfile.values():
+            dst = Output_Folder_Path.joinpath(src.name)
+            print(f"Copy static file to {dst}")
+            shutil.copyfile(src, dst)
+
+
 def render_blog_config(cfg):
     tmpl = jinja_env.get_template(tmplfile["blog_cfg"])
     blog_toml = tmpl.render(dict(cfg=cfg))
@@ -31,7 +50,15 @@ def render_blog_config(cfg):
     Blog_Config_Path.write_text(blog_toml, encoding="utf-8")
 
 
-def render_article_html(md_file: Path, art_cfg: ArticleConfig):
+def render_article_html(
+    md_file: Path, art_cfg: ArticleConfig, copy_assets: bool, force_all:bool
+):
+    folder_is_empty = not os.listdir(Output_Folder_Path)
+    if folder_is_empty or copy_assets:
+        copy_static_files()
+
+    if folder_is_empty:
+        force_all = True
     pass
 
 

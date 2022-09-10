@@ -9,6 +9,7 @@ import tomli
 RFC3339 = "YYYY-MM-DD HH:mm:ssZZ"
 Blog_Config_Filename = "blog.toml"
 Drafts_Folder_Name = "drafts"
+Draft_TMPL_Name = "draft.md"
 Articles_Folder_Name = "articles"
 Pics_Folder_Name = "pics"
 Metadata_Folder_Name = "metadata"
@@ -26,6 +27,7 @@ Pics_Folder_Path = Articles_Folder_Path.joinpath(Pics_Folder_Name)
 Metadata_Folder_Path = Articles_Folder_Path.joinpath(Metadata_Folder_Name)
 Output_Folder_Path = CWD.joinpath(Output_Folder_Name)
 Templates_Folder_Path = CWD.joinpath(Templates_Folder_Name)
+Draft_TMPL_Path = Templates_Folder_Path.joinpath(Draft_TMPL_Name)
 Blog_Config_Path = CWD.joinpath(Blog_Config_Filename)
 
 # 文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线)。

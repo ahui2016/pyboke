@@ -4,7 +4,7 @@ import jinja2
 
 from . import model
 from .model import RSS_Atom_XML, Blog_Config_Filename, Blog_Config_Path, \
-    Templates_Folder_Path, TOML_Suffix, ArticleConfig, Metadata_Folder_Path
+    Templates_Folder_Path, TOML_Suffix, ArticleConfig, Metadata_Folder_Path, Draft_TMPL_Name
 
 loader = jinja2.FileSystemLoader(Templates_Folder_Path)
 jinja_env = jinja2.Environment(
@@ -16,6 +16,7 @@ jinja_env = jinja2.Environment(
 tmplfile = dict(
     blog_cfg=Blog_Config_Filename,
     art_cfg="article.toml",
+    draft=Draft_TMPL_Name,
     base="base.html",
     index="index.html",
     article="article.html",

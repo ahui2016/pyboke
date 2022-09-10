@@ -6,13 +6,13 @@ name = '''{{cfg.name}}'''
 # [必填] 博客作者
 author = '''{{cfg.author}}'''
 
-# [必填] 首页 "最近文章" 列表中的项目上限
+# 首页 "最近文章" 列表中的项目上限
 home_recent_max = {{cfg.home_recent_max}}
 
-# [必填] 文章标题长度上限，单位: byte
+# 文章标题长度上限，单位: byte
 title_length_max = {{cfg.title_length_max}}
 
-# [必填] 博客网址，用于 RSS feed
+# [可暂时不填，但正式发布博客到网上时必填] 博客网址，用于 RSS feed
 website = '''{{cfg.website}}'''
 
 # 请填写以上项目

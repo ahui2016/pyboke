@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import click
@@ -7,7 +8,7 @@ from . import (
     __package_name__,
     util,
 )
-from .model import BlogConfig
+from .model import BlogConfig, Articles_Folder_Path, Drafts_Folder_Path, Draft_TMPL_Path, Draft_TMPL_Name
 from .tmpl_render import render_article
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -65,6 +66,52 @@ def init_command(ctx):
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS)
+@click.argument("filename", nargs=1)
+@click.pass_context
+def new(ctx, filename):
+    """Create a new draft. (新建一个草稿文件)
+
+    Example: boke new drafts/abc.md
+    """
+    check_initialization(ctx)
+    if err := util.check_filename(filename, Drafts_Folder_Path):
+        print(f"Error: {err}")
+        ctx.exit()
+
+    file_path = Path(filename)
+    if file_path.exists():
+        print(f"Error: 文件已存在: {filename}")
+        ctx.exit()
+
+    dst = Drafts_Folder_Path.joinpath(file_path.name)
+    shutil.copyfile(Draft_TMPL_Path, dst)
+    print("OK")
+
+
+@cli.command(context_settings=CONTEXT_SETTINGS)
+@click.argument("filename", nargs=1, type=click.Path(exists=True))
+@click.pass_context
+def post(ctx, filename):
+    """Post an article in drafts. (发布 drafts 文件夹内的文章)
+
+    Example: boke post drafts/abc.md
+    """
+    cfg = check_initialization(ctx)
+    if err := util.check_filename(filename, Drafts_Folder_Path):
+        print(f"Error: {err}")
+        ctx.exit()
+
+    file_path = Path(filename)
+    article = Articles_Folder_Path.joinpath(file_path.name)
+    shutil.move(file_path, article)
+    print(f"Move {filename} to {article}")
+
+    if err := render_article(article, cfg.title_length_max, force=False):
+        print(f"Error: {err}")
+        ctx.exit()
+
+
+@cli.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("filename", nargs=1, type=click.Path(exists=True))
 @click.option(
     "force",
@@ -79,17 +126,18 @@ def render(ctx, filename, force):
 
     Examples:
 
-    boke render ./articles/abc.md
+    boke render articles/abc.md
 
-    boke render -force ./articles/abcd.md
+    boke render -force articles/abcd.md
 
     boke render -all
     """
-    if err := util.check_filename(filename):
+    cfg = check_initialization(ctx)
+
+    if err := util.check_filename(filename, Articles_Folder_Path):
         print(f"Error: {err}")
         ctx.exit()
 
-    cfg = check_initialization(ctx)
     if err := render_article(Path(filename), cfg.title_length_max, force):
         print(f"Error: {err}")
         ctx.exit()

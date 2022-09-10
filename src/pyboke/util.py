@@ -5,7 +5,8 @@ from pathlib import Path
 
 from . import model
 from .model import Blog_Config_Path, CWD, Templates_Folder_Name, Articles_Folder_Path, \
-    Templates_Folder_Path, Output_Folder_Path, BlogConfig, Pics_Folder_Path, RSS_Atom_XML
+    Templates_Folder_Path, Output_Folder_Path, BlogConfig, Pics_Folder_Path, RSS_Atom_XML, Metadata_Folder_Path, \
+    Drafts_Folder_Path
 from .tmpl_render import render_blog_config
 
 
@@ -27,8 +28,10 @@ def init_blog():
     if dir_not_empty(CWD):
         return f"Folder Not Empty: {CWD}"
 
+    Drafts_Folder_Path.mkdir()
     Articles_Folder_Path.mkdir()
     Pics_Folder_Path.mkdir()
+    Metadata_Folder_Path.mkdir()
     Output_Folder_Path.mkdir()
     copy_templates()
     render_blog_config(BlogConfig.default())
@@ -36,9 +39,12 @@ def init_blog():
 
 
 def blog_file_folders_exist():
-    return Articles_Folder_Path.exists()\
+    return Drafts_Folder_Path.exists()\
+        and Articles_Folder_Path.exists()\
         and Pics_Folder_Path.exists()\
+        and Metadata_Folder_Path.exists()\
         and Output_Folder_Path.exists()\
+        and Templates_Folder_Path.exists()\
         and Blog_Config_Path.exists()
 
 
@@ -85,13 +91,15 @@ def ensure_blog_config():
     return False, cfg
 
 
-def check_filename(filename):
+def check_filename(filename, parent_dir):
     """
+    确保 filename 只包含合法字符，并确保其在 parent_dir 里。
+
     :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
     """
     file = Path(filename)
     if err := model.check_filename(file.name):
         return err
-    if not file.parent.samefile(Articles_Folder_Path):
-        return f"不在 articles 文件夹内: {filename}"
+    if not file.parent.samefile(parent_dir):
+        return f"不在 {parent_dir.name} 文件夹内: {filename}"
     return False

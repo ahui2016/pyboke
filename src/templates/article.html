@@ -11,25 +11,13 @@
 
 {{ art.content|safe }}
 
-<div class="art-info">
-  <div class="Tags">
-  Tags:
-  {% for tag in tags %}
-  <a href="../tag_{{tag.id}}.html">{{tag.name}}</a>
-  {% endfor %}
-  </div>
-</div>
-
 <div class="footer">
   <div class="nav-buttons">
     <a href="../index.html">&lt;&lt; Home</a>
-    <br>
-    <a href="../cat_{{cat.id}}.html">&lt;&lt; Category ({{ cat.name }})</a>
   </div>
   <div class="author-date">
-    <span>Article ID: {{ art.id }}</span>
-    <br>
-    <span>Updated at {{ art.updated[:10] }}</span>
+    <span>Created at {{ art.ctime[:10] }}</span>
+    <span>Updated at {{ art.mtime[:10] }}</span>
   </div>
 </div>
 {% endblock %}
@@ -43,7 +31,7 @@
     Author: {{ blog.author }}
     {% endif %}
     | LICENSE <a href="../LICENSE.txt">CC0-1.0</a>
-    | RSS <a href="../atom.xml">atom.xml</a>
+    | RSS <a href="atom.xml">atom.xml</a>
   </p>
 </footer>
 {% endblock %}

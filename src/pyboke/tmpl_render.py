@@ -1,19 +1,23 @@
 import os
 import shutil
+from dataclasses import asdict
 from pathlib import Path
 
 import jinja2
+import mistune
 
 from . import model
 from .model import RSS_Atom_XML, Blog_Config_Filename, Blog_Config_Path, \
     Templates_Folder_Path, TOML_Suffix, ArticleConfig, Metadata_Folder_Path, \
-    Draft_TMPL_Name, Output_Folder_Path
+    Draft_TMPL_Name, Output_Folder_Path, BlogConfig, HTML_Suffix
 
 loader = jinja2.FileSystemLoader(Templates_Folder_Path)
 jinja_env = jinja2.Environment(
     loader=loader, autoescape=jinja2.select_autoescape()
 )
-
+md_render = mistune.create_markdown(
+    plugins=["strikethrough", "footnotes", "table"]
+)
 
 # 渲染时，除了 tmplfile 之外, templates 文件夹里的全部文件都会被复制到 output 文件夹。
 tmplfile = dict(
@@ -44,7 +48,11 @@ def render_blog_config(cfg):
 
 
 def render_article_html(
-    md_file: Path, art_cfg: ArticleConfig, copy_assets: bool, force_all:bool
+        md_file: Path,
+        blog_cfg: BlogConfig,
+        art_cfg: ArticleConfig,
+        copy_assets: bool,
+        force_all: bool
 ):
     folder_is_empty = not os.listdir(Output_Folder_Path)
     if folder_is_empty or copy_assets:
@@ -52,14 +60,22 @@ def render_article_html(
 
     if folder_is_empty:
         force_all = True
-    pass
+
+    art = asdict(art_cfg)
+    art["content"] = md_render(md_file.read_text(encoding="utf-8"))
+    tmpl = jinja_env.get_template(tmplfile["article"])
+    html = tmpl.render(dict(blog=blog_cfg, art=art))
+    html_name = md_file.with_suffix(HTML_Suffix).name
+    html_path = Output_Folder_Path.joinpath(html_name)
+    print(f"render and write {html_path}")
+    html_path.write_text(html, encoding="utf-8")
 
 
-def render_article(md_file: Path, title_length: int, force: bool):
+def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     """
     :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
     """
-    art_cfg_new = ArticleConfig.from_md_file(md_file, title_length)
+    art_cfg_new = ArticleConfig.from_md_file(md_file, blog_cfg.title_length_max)
     if not art_cfg_new.title:
         return "无法获取文章标题，请修改文章的标题(文件的第一行内容)"
 
@@ -91,8 +107,7 @@ def render_article(md_file: Path, title_length: int, force: bool):
 
     # 需要渲染 html
     if need_to_render or force:
-        print("render_article_html")
-        render_article_html(md_file, art_cfg, copy_assets=False, force_all=False)
+        render_article_html(md_file, blog_cfg, art_cfg, copy_assets=False, force_all=False)
 
     return False
 

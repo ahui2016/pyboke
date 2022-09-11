@@ -109,7 +109,7 @@ def post(ctx, filename):
     shutil.move(file_path, article)
     print(f"Move {filename} to {article}")
 
-    if err := render_article(article, cfg.title_length_max, force=False):
+    if err := render_article(article, cfg, force=False):
         print(f"Error: {err}")
         ctx.exit()
 
@@ -147,6 +147,6 @@ def render(ctx, filename, force):
         print(f"Error: {err}")
         ctx.exit()
 
-    if err := render_article(file_path, cfg.title_length_max, force):
+    if err := render_article(file_path, cfg, force):
         print(f"Error: {err}")
         ctx.exit()

@@ -6,7 +6,8 @@ import jinja2
 
 from . import model
 from .model import RSS_Atom_XML, Blog_Config_Filename, Blog_Config_Path, \
-    Templates_Folder_Path, TOML_Suffix, ArticleConfig, Metadata_Folder_Path, Draft_TMPL_Name, Output_Folder_Path
+    Templates_Folder_Path, TOML_Suffix, ArticleConfig, Metadata_Folder_Path, \
+    Draft_TMPL_Name, Output_Folder_Path
 
 loader = jinja2.FileSystemLoader(Templates_Folder_Path)
 jinja_env = jinja2.Environment(
@@ -24,14 +25,6 @@ tmplfile = dict(
     article="article.html",
     rss=RSS_Atom_XML,
 )
-
-
-def set_current_theme(name):
-    theme_filename = f"{name.lower()}.theme"
-    theme_filepath = Output_Folder_Path.joinpath(theme_filename)
-
-def get_current_theme():
-
 
 
 def copy_static_files():
@@ -99,7 +92,7 @@ def render_article(md_file: Path, title_length: int, force: bool):
     # 需要渲染 html
     if need_to_render or force:
         print("render_article_html")
-        render_article_html(md_file, art_cfg)
+        render_article_html(md_file, art_cfg, copy_assets=False, force_all=False)
 
     return False
 

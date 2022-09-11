@@ -15,10 +15,13 @@ Pics_Folder_Name = "pics"
 Metadata_Folder_Name = "metadata"
 Output_Folder_Name = "output"
 Templates_Folder_Name = "templates"
+Themes_Folder_Name = "themes"
 HTML_Suffix = ".html"
 TOML_Suffix = ".toml"
 MD_Suffix = ".md"
 RSS_Atom_XML = "atom.xml"
+Theme_CSS_Name = "theme.css"
+Default_Theme_Name = "simple"
 
 CWD = Path.cwd().resolve()
 Drafts_Folder_Path = CWD.joinpath(Drafts_Folder_Name)
@@ -26,7 +29,9 @@ Articles_Folder_Path = CWD.joinpath(Articles_Folder_Name)
 Pics_Folder_Path = Articles_Folder_Path.joinpath(Pics_Folder_Name)
 Metadata_Folder_Path = Articles_Folder_Path.joinpath(Metadata_Folder_Name)
 Output_Folder_Path = CWD.joinpath(Output_Folder_Name)
+Theme_CSS_Path = Output_Folder_Path.joinpath(Theme_CSS_Name)
 Templates_Folder_Path = CWD.joinpath(Templates_Folder_Name)
+Themes_Folder_Path = Templates_Folder_Path.joinpath(Themes_Folder_Name)
 Draft_TMPL_Path = Templates_Folder_Path.joinpath(Draft_TMPL_Name)
 Blog_Config_Path = CWD.joinpath(Blog_Config_Filename)
 

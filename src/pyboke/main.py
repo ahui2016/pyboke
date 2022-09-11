@@ -82,6 +82,9 @@ def new(ctx, filename):
     if file_path.exists():
         print(f"Error: 文件已存在: {filename}")
         ctx.exit()
+    if err := util.check_md_suffix(file_path):
+        print(f"Error: {err}")
+        ctx.exit()
 
     dst = Drafts_Folder_Path.joinpath(file_path.name)
     shutil.copyfile(Draft_TMPL_Path, dst)
@@ -138,6 +141,12 @@ def render(ctx, filename, force):
         print(f"Error: {err}")
         ctx.exit()
 
-    if err := render_article(Path(filename), cfg.title_length_max, force):
+    file_path = Path(filename)
+
+    if err := util.check_md_suffix(file_path):
+        print(f"Error: {err}")
+        ctx.exit()
+
+    if err := render_article(file_path, cfg.title_length_max, force):
         print(f"Error: {err}")
         ctx.exit()

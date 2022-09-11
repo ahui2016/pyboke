@@ -5,13 +5,20 @@ from pathlib import Path
 
 from . import model
 from .model import Blog_Config_Path, CWD, Templates_Folder_Name, Articles_Folder_Path, \
-    Templates_Folder_Path, Output_Folder_Path, BlogConfig, Pics_Folder_Path, RSS_Atom_XML, Metadata_Folder_Path, \
-    Drafts_Folder_Path
+    Templates_Folder_Path, Output_Folder_Path, BlogConfig, Pics_Folder_Path, RSS_Atom_XML, \
+    Metadata_Folder_Path, Drafts_Folder_Path, Default_Theme_Name, Themes_Folder_Path, Theme_CSS_Path, MD_Suffix
 from .tmpl_render import render_blog_config
 
 
 def dir_not_empty(path):
     return True if os.listdir(path) else False
+
+
+def copy_theme_css(name):
+    name = name.lower()
+    theme_css_file = Themes_Folder_Path.joinpath(f"{name}.css")
+    shutil.copyfile(theme_css_file, Theme_CSS_Path)
+    print(f"Using theme: {name}")
 
 
 def copy_templates():
@@ -34,6 +41,7 @@ def init_blog():
     Metadata_Folder_Path.mkdir()
     Output_Folder_Path.mkdir()
     copy_templates()
+    copy_theme_css(Default_Theme_Name)
     render_blog_config(BlogConfig.default())
     print(f"请用文本编辑器打开 {Blog_Config_Path} 填写博客名称、作者名称等。")
 
@@ -102,4 +110,10 @@ def check_filename(filename, parent_dir):
         return err
     if not file.parent.samefile(parent_dir):
         return f"不在 {parent_dir.name} 文件夹内: {filename}"
+    return False
+
+
+def check_md_suffix(file_path):
+    if file_path.suffix != MD_Suffix:
+        return f"后缀名不是 '{MD_Suffix}': {file_path}"
     return False

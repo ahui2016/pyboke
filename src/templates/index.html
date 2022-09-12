@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block main %}
+<header>
+  <h1>{{ blog.name }}</h1>
+</header>
+
+<h3>Recent articles</h3>
+<ul>
+  {% for art in articles %}
+  <li>{{ art.ctime[:10] }}
+    <a href="{{art.id}}.html">{{art.title}}</a></li>
+  {% endfor %}
+</ul>
+
+<h3>Archives</h3>
+<div id="archives">
+  {% for item in year_count %}
+  <a href="{{item[0]}}.html">{{item[0]}} ({{item[1]}})</a>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block footer %}
+<div id="footer">
+  <p>
+    Author: {{ blog.author }}
+    | LICENSE <a href="LICENSE.txt">CC0-1.0</a>
+    | RSS <a href="atom.xml">atom.xml</a>
+  </p>
+</div>
+{% endblock %}

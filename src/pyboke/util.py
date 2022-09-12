@@ -7,11 +7,25 @@ from . import model
 from .model import Blog_Config_Path, CWD, Templates_Folder_Name, Articles_Folder_Path, \
     Templates_Folder_Path, Output_Folder_Path, BlogConfig, Pics_Folder_Path, RSS_Atom_XML, \
     Metadata_Folder_Path, Drafts_Folder_Path, Default_Theme_Name, Themes_Folder_Path, Theme_CSS_Path, MD_Suffix
-from .tmpl_render import render_blog_config
+from .tmpl_render import render_blog_config, tmplfile
 
 
 def dir_not_empty(path):
     return True if os.listdir(path) else False
+
+
+def copy_templates():
+    src_folder = Path(__file__).parent.parent.joinpath(Templates_Folder_Name)
+    shutil.copytree(src_folder, Templates_Folder_Path)
+
+
+def copy_static_files():
+    static_files = Templates_Folder_Path.glob("*")
+    for src in static_files:
+        if src.is_file() and src.name not in tmplfile.values():
+            dst = Output_Folder_Path.joinpath(src.name)
+            print(f"Copy static file to {dst}")
+            shutil.copyfile(src, dst)
 
 
 def copy_theme_css(name):
@@ -19,11 +33,6 @@ def copy_theme_css(name):
     theme_css_file = Themes_Folder_Path.joinpath(f"{name}.css")
     shutil.copyfile(theme_css_file, Theme_CSS_Path)
     print(f"Using theme: {name}")
-
-
-def copy_templates():
-    src_folder = Path(__file__).parent.parent.joinpath(Templates_Folder_Name)
-    shutil.copytree(src_folder, Templates_Folder_Path)
 
 
 def init_blog():
@@ -41,6 +50,7 @@ def init_blog():
     Metadata_Folder_Path.mkdir()
     Output_Folder_Path.mkdir()
     copy_templates()
+    copy_static_files()
     copy_theme_css(Default_Theme_Name)
     render_blog_config(BlogConfig.default())
     print(f"请用文本编辑器打开 {Blog_Config_Path} 填写博客名称、作者名称等。")

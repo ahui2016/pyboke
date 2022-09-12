@@ -1,6 +1,6 @@
 import os
-import shutil
 from dataclasses import asdict
+from operator import itemgetter
 from pathlib import Path
 
 import jinja2
@@ -10,6 +10,8 @@ from . import model
 from .model import RSS_Atom_XML, Blog_Config_Filename, Blog_Config_Path, \
     Templates_Folder_Path, TOML_Suffix, ArticleConfig, Metadata_Folder_Path, \
     Draft_TMPL_Name, Output_Folder_Path, BlogConfig, HTML_Suffix
+
+# 注意: tmpl_render.py 不能 import util.py
 
 loader = jinja2.FileSystemLoader(Templates_Folder_Path)
 jinja_env = jinja2.Environment(
@@ -26,18 +28,10 @@ tmplfile = dict(
     draft=Draft_TMPL_Name,
     base="base.html",
     index="index.html",
+    year="year.html",
     article="article.html",
     rss=RSS_Atom_XML,
 )
-
-
-def copy_static_files():
-    static_files = Templates_Folder_Path.glob("*")
-    for src in static_files:
-        if src.is_file() and src.name not in tmplfile.values():
-            dst = Output_Folder_Path.joinpath(src.name)
-            print(f"Copy static file to {dst}")
-            shutil.copyfile(src, dst)
 
 
 def render_blog_config(cfg):
@@ -47,19 +41,64 @@ def render_blog_config(cfg):
     Blog_Config_Path.write_text(blog_toml, encoding="utf-8")
 
 
+def get_all_articles():
+    articles = Metadata_Folder_Path.glob(f"*{TOML_Suffix}")
+    arts = []
+    for art_path in articles:
+        art = ArticleConfig.loads(art_path)
+        art = asdict(art)
+        art["id"] = art_path.stem
+        arts.append(art)
+    return sorted(arts, key=itemgetter("ctime"), reverse=True)
+
+
+def get_recent_articles(arts, blog_cfg):
+    return arts[:blog_cfg.home_recent_max]
+
+
+def get_articles_in_years(sorted_articles):
+    """全部年份的全部文章"""
+    arts = {}
+    for art in sorted_articles:
+        yyyy = art["ctime"][:4]
+        if yyyy in arts:
+            arts[yyyy].append(art)
+        else:
+            arts[yyyy] = [art]
+    return arts
+
+
+def get_year_count(arts_in_years):
+    return [(year, len(arts_in_years[year])) for year in arts_in_years]
+
+
+def articles_in_year(sorted_articles, year):
+    """指定年份的文章列表"""
+    return [art for art in sorted_articles if art["ctime"][:4] == year]
+
+
+def render_index_html(recent_articles, blog_cfg, year_count):
+    tmpl = jinja_env.get_template(tmplfile["index"])
+    html = tmpl.render(dict(blog=blog_cfg, articles=recent_articles, year_count=year_count))
+    output_path = Output_Folder_Path.joinpath(tmplfile["index"])
+    print(f"render and write {output_path}")
+    output_path.write_text(html, encoding="utf-8")
+
+
+def render_year_html(articles, blog_cfg, year):
+    tmpl = jinja_env.get_template(tmplfile["year"])
+    html = tmpl.render(dict(articles=articles, blog=blog_cfg, year=year))
+    output_path = Output_Folder_Path.joinpath(f"{year}{HTML_Suffix}")
+    print(f"render and write {output_path}")
+    output_path.write_text(html, encoding="utf-8")
+
+
 def render_article_html(
         md_file: Path,
         blog_cfg: BlogConfig,
         art_cfg: ArticleConfig,
-        copy_assets: bool,
-        force_all: bool
 ):
     folder_is_empty = not os.listdir(Output_Folder_Path)
-    if folder_is_empty or copy_assets:
-        copy_static_files()
-
-    if folder_is_empty:
-        force_all = True
 
     art = asdict(art_cfg)
     art["content"] = md_render(md_file.read_text(encoding="utf-8"))
@@ -107,7 +146,13 @@ def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
 
     # 需要渲染 html
     if need_to_render or force:
-        render_article_html(md_file, blog_cfg, art_cfg, copy_assets=False, force_all=False)
+        render_article_html(md_file, blog_cfg, art_cfg)
+        all_arts = get_all_articles()
+        recent_arts = get_recent_articles(all_arts, blog_cfg)
+        arts_in_years = get_articles_in_years(all_arts)
+        year_count = get_year_count(arts_in_years)
+        render_index_html(recent_arts, blog_cfg, year_count)
+        render_year_html(recent_arts, blog_cfg, art_cfg.ctime[:4])
 
     return False
 

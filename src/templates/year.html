@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title%}
+  <title>{{ year }} - {{ blog.name }}</title>
+{% endblock %}
+
+{% block main %}
+<div class="text-right"><a href="index.html">&lt;&lt; Home</a></div>
+<h2>Articles in year {{ year }}</h2>
+<ul>
+  {% for art in articles %}
+  <li>{{ art.ctime[:10] }} <a href="{{art.id}}.html">{{art.title}}</a></li>
+  {% endfor %}
+</ul>
+{% endblock %}

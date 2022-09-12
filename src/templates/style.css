@@ -21,34 +21,7 @@ img {
   text-align: right;
 }
 
-.FeedInfo {
-  text-align: right;
-  font-size: small;
-  margin-bottom: 1.5rem;
-}
-
-.FeedEntry {
-  margin-bottom: 1.5rem;
-  word-wrap: break-word;
-  /* word-break: break-all; */
-}
-
-.EntryTitle {
-  color: gray;
-  font-size: small;
-}
-
-.NavButtons {
-  margin-top: 1.5rem;
-  text-align: center;
-}
-
-.NavButtons a + a{
-  margin-left: 1rem;
-}
-
-.Tags,
-.Categories {
+#archives {
   display: flex;
   flex-wrap: wrap;
   gap: 0 1rem;
@@ -58,24 +31,27 @@ img {
   font-size: small;
   margin-top: 5rem;
 }
-.footer {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1.5rem;
-  /* margin-bottom: 5rem; */
-  padding-top: 1.5rem;
-  border-top: 1px solid #ccc;
-}
 
-.author-date {
+#updated-at {
+  font-size: small;
+  margin-top: 2rem;
   text-align: right;
 }
 
-footer {
-  text-align: center;
+#footer {
   font-size: small;
-  margin-top: 3rem; 
-  margin-bottom: 1.5rem; 
-  padding-top: 1.5rem;
   border-top: 1px solid #ccc;
+}
+
+#footer-home-link {
+  margin-top: 0;
+  margin-bottom: 0;
+  text-align: right;
+}
+
+#footer-body {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 3rem;
+  padding-top: 1.5rem;
 }

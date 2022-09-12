@@ -11,27 +11,22 @@
 
 {{ art.content|safe }}
 
-<div class="footer">
-  <div class="nav-buttons">
-    <a href="../index.html">&lt;&lt; Home</a>
-  </div>
-  <div class="author-date">
-    <span>Created at {{ art.ctime[:10] }}</span>
-    <span>Updated at {{ art.mtime[:10] }}</span>
-  </div>
+<div id="updated-at">
+  <span>Updated at {{ art.mtime[0:19] }}</span>
 </div>
 {% endblock %}
 
 {% block footer %}
-<footer>
-  <p>
+<div id="footer">
+  <div id="footer-home-link"><a href="index.html">&lt;&lt; Home</a></div>
+  <p id="footer-body">
     {% if art.author|length %}
     Author: {{ art.author }}
     {% else %}
     Author: {{ blog.author }}
     {% endif %}
-    | LICENSE <a href="../LICENSE.txt">CC0-1.0</a>
+    | LICENSE <a href="LICENSE.txt">CC0-1.0</a>
     | RSS <a href="atom.xml">atom.xml</a>
   </p>
-</footer>
+</div>
 {% endblock %}

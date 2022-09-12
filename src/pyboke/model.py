@@ -6,6 +6,8 @@ from pathlib import Path
 import arrow
 import tomli
 
+# 注意: model.py 在最底层，不能 import util.py, tmpl_render.py, 更不能 import main.py
+
 RFC3339 = "YYYY-MM-DD HH:mm:ssZZ"
 Blog_Config_Filename = "blog.toml"
 Drafts_Folder_Name = "drafts"

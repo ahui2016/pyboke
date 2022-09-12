@@ -16,6 +16,7 @@ Articles_Folder_Name = "articles"
 Pics_Folder_Name = "pics"
 Metadata_Folder_Name = "metadata"
 Output_Folder_Name = "output"
+Indexes_Folder_Name = "indexes"
 Templates_Folder_Name = "templates"
 Themes_Folder_Name = "themes"
 HTML_Suffix = ".html"
@@ -31,6 +32,7 @@ Articles_Folder_Path = CWD.joinpath(Articles_Folder_Name)
 Pics_Folder_Path = Articles_Folder_Path.joinpath(Pics_Folder_Name)
 Metadata_Folder_Path = Articles_Folder_Path.joinpath(Metadata_Folder_Name)
 Output_Folder_Path = CWD.joinpath(Output_Folder_Name)
+Indexes_Folder_Path = Output_Folder_Path.joinpath(Indexes_Folder_Name)
 Theme_CSS_Path = Output_Folder_Path.joinpath(Theme_CSS_Name)
 Templates_Folder_Path = CWD.joinpath(Templates_Folder_Name)
 Themes_Folder_Path = Templates_Folder_Path.joinpath(Themes_Folder_Name)
@@ -40,6 +42,9 @@ Blog_Config_Path = CWD.joinpath(Blog_Config_Filename)
 # 文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线)。
 Filename_Forbid_Pattern = re.compile(r"[^._0-9a-zA-Z\-]")
 Markdown_Title_Pattern = re.compile(r"^(#{1,6}|>|1.|-|\*) (.+)")
+
+# 标题索引字数（以后有可能改成允许用户自定义）
+Title_Index_Length = 1
 
 
 def now():
@@ -112,6 +117,13 @@ class ArticleConfig:
     def copy(self):
         """Make a copy."""
         return ArticleConfig(**asdict(self))
+
+
+@dataclass
+class TitleIndex:
+    name: str
+    id: str
+    articles: []  # List[ArticleConfig]
 
 
 def tomli_loads(file) -> dict:

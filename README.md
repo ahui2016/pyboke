@@ -59,6 +59,7 @@ Static Blog Generator (极简博客生成器)
 因此，如果想在不修改文章内容的情况下，修改文章的作者或日期，就需要强制渲染。
 
 - `boke render -force articles/filename` 强制渲染指定的一篇文章。
+- `boke render --title-index` 强制渲染全部标题索引（在发现未触发更新时使用）
 - `boke render -force -all` 强制渲全部文章。
 
 大多数情况下不需要强制渲染，但有一种情况：修改了 blog.toml 里的博客名称、作者名称

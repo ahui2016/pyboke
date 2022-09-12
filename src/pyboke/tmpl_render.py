@@ -9,7 +9,7 @@ import mistune
 from . import model
 from .model import RSS_Atom_XML, Blog_Config_Filename, Blog_Config_Path, \
     Templates_Folder_Path, TOML_Suffix, ArticleConfig, Metadata_Folder_Path, \
-    Draft_TMPL_Name, Output_Folder_Path, BlogConfig, HTML_Suffix
+    Draft_TMPL_Name, Output_Folder_Path, BlogConfig, HTML_Suffix, TitleIndex, Indexes_Folder_Path, Title_Index_Length
 
 # 注意: tmpl_render.py 不能 import util.py
 
@@ -29,6 +29,8 @@ tmplfile = dict(
     base="base.html",
     index="index.html",
     year="year.html",
+    title_index="title-index.html",
+    indexes="indexes.html",
     article="article.html",
     rss=RSS_Atom_XML,
 )
@@ -77,6 +79,23 @@ def articles_in_year(sorted_articles, year):
     return [art for art in sorted_articles if art["ctime"][:4] == year]
 
 
+def get_title_indexes(sorted_articles):
+    indexes = {}
+    n = 1
+    for art in sorted_articles:
+        index = art["title"][:Title_Index_Length]
+        if index in indexes:
+            indexes[index].articles.append(art)
+        else:
+            indexes[index] = TitleIndex(
+                name=index,
+                id=f"{n:04}",
+                articles=[art]
+            )
+            n += 1
+    return indexes
+
+
 def render_index_html(recent_articles, blog_cfg, year_count):
     tmpl = jinja_env.get_template(tmplfile["index"])
     html = tmpl.render(dict(blog=blog_cfg, articles=recent_articles, year_count=year_count))
@@ -93,13 +112,37 @@ def render_year_html(articles, blog_cfg, year):
     output_path.write_text(html, encoding="utf-8")
 
 
+def render_all_title_indexes(blog_cfg):
+    all_articles = get_all_articles()
+    title_indexes = get_title_indexes(all_articles)
+
+    tmpl = jinja_env.get_template(tmplfile["indexes"])
+    for index in title_indexes.values():
+        html = tmpl.render(dict(
+            index_name=index.name,
+            articles=index.articles,
+            blog=blog_cfg
+        ))
+        output_path = Indexes_Folder_Path.joinpath(f"{index.id}{HTML_Suffix}")
+        print(f"render and write {output_path}")
+        output_path.write_text(html, encoding="utf-8")
+        index.articles = []
+
+    tmpl = jinja_env.get_template(tmplfile["title_index"])
+    html = tmpl.render(dict(
+        indexes=title_indexes.values(),
+        blog=blog_cfg
+    ))
+    output_path = Output_Folder_Path.joinpath(tmplfile["title_index"])
+    print(f"render and write {output_path}")
+    output_path.write_text(html, encoding="utf-8")
+
+
 def render_article_html(
         md_file: Path,
         blog_cfg: BlogConfig,
         art_cfg: ArticleConfig,
 ):
-    folder_is_empty = not os.listdir(Output_Folder_Path)
-
     art = asdict(art_cfg)
     art["content"] = md_render(md_file.read_text(encoding="utf-8"))
     tmpl = jinja_env.get_template(tmplfile["article"])

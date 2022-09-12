@@ -9,7 +9,7 @@ from . import (
     util,
 )
 from .model import BlogConfig, Articles_Folder_Path, Drafts_Folder_Path, Draft_TMPL_Path, Draft_TMPL_Name
-from .tmpl_render import render_article
+from .tmpl_render import render_article, render_all_title_indexes
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -115,7 +115,14 @@ def post(ctx, filename):
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS)
-@click.argument("filename", nargs=1, type=click.Path(exists=True))
+@click.argument("filename", nargs=-1, type=click.Path(exists=True))
+@click.option(
+    "indexes",
+    "--title-index",
+    is_flag=True,
+    default=False,
+    help="强制渲染全部标题索引"
+)
 @click.option(
     "force",
     "-force",
@@ -124,8 +131,8 @@ def post(ctx, filename):
     help="强制渲染HTML"
 )
 @click.pass_context
-def render(ctx, filename, force):
-    """Render an article. (渲染文章的 toml 和 html)
+def render(ctx, filename, indexes, force):
+    """Render TOML and HTML. (渲染文章的 toml 和 html)
 
     Examples:
 
@@ -136,6 +143,14 @@ def render(ctx, filename, force):
     boke render -all
     """
     cfg = check_initialization(ctx)
+
+    if indexes:
+        render_all_title_indexes(cfg)
+        ctx.exit()
+
+    if len(filename) != 1:
+        print("请指定 articles 文件夹中的 1 个文件")
+        ctx.exit()
 
     if err := util.check_filename(filename, Articles_Folder_Path):
         print(f"Error: {err}")

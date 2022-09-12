@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title%}
+  <title>标题索引 - {{ blog.name }}</title>
+{% endblock %}
+
+{% block main %}
+<div class="text-right"><a href="index.html">&lt;&lt; Home</a></div>
+
+<header>
+  <h3>标题索引 - {{ blog.name }}</h3>
+</header>
+
+<div id="title-index-list">
+  {% for item in indexes %}
+  <div class="TitleIndexItem">
+    <a href="indexes/{{item.id}}.html">{{item.name}}</a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

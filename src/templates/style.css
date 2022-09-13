@@ -25,6 +25,7 @@ img {
   display: flex;
   flex-wrap: wrap;
   gap: 0 1rem;
+  margin-bottom: 5rem;
 }
 
 .art-info {
@@ -34,7 +35,7 @@ img {
 
 #updated-at {
   font-size: small;
-  margin-top: 2rem;
+  margin-top: 5rem;
   text-align: right;
 }
 

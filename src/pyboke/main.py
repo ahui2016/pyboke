@@ -9,7 +9,7 @@ from . import (
     util,
 )
 from .model import BlogConfig, Articles_Folder_Path, Drafts_Folder_Path, Draft_TMPL_Path, Draft_TMPL_Name
-from .tmpl_render import render_article, render_all_title_indexes
+from .tmpl_render import render_article, render_all_title_indexes, render_all_years
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -106,6 +106,10 @@ def post(ctx, filename):
 
     file_path = Path(filename)
     article = Articles_Folder_Path.joinpath(file_path.name)
+    if article.exists():
+        print(f"Error: 文件已存在: {article}")
+        ctx.exit()
+
     shutil.move(file_path, article)
     print(f"Move {filename} to {article}")
 
@@ -124,6 +128,13 @@ def post(ctx, filename):
     help="强制渲染全部标题索引"
 )
 @click.option(
+    "years",
+    "--years",
+    is_flag=True,
+    default=False,
+    help="强制渲染全部年份列表"
+)
+@click.option(
     "force",
     "-force",
     is_flag=True,
@@ -131,7 +142,7 @@ def post(ctx, filename):
     help="强制渲染HTML"
 )
 @click.pass_context
-def render(ctx, filename, indexes, force):
+def render(ctx, filename, indexes, years, force):
     """Render TOML and HTML. (渲染文章的 toml 和 html)
 
     Examples:
@@ -146,11 +157,18 @@ def render(ctx, filename, indexes, force):
 
     if indexes:
         render_all_title_indexes(cfg)
+
+    if years:
+        render_all_years(cfg)
+
+    if indexes or years:
         ctx.exit()
 
     if len(filename) != 1:
         print("请指定 articles 文件夹中的 1 个文件")
         ctx.exit()
+
+    filename = filename[0]
 
     if err := util.check_filename(filename, Articles_Folder_Path):
         print(f"Error: {err}")

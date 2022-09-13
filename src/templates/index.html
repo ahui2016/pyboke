@@ -15,6 +15,7 @@
 
 <h3>Archives</h3>
 <div id="archives">
+  <a href="title-index.html">TitleIndex</a>
   {% for item in year_count %}
   <a href="{{item[0]}}.html">{{item[0]}} ({{item[1]}})</a>
   {% endfor %}
@@ -23,7 +24,7 @@
 
 {% block footer %}
 <div id="footer">
-  <p>
+  <p id="footer-body">
     Author: {{ blog.author }}
     | LICENSE <a href="LICENSE.txt">CC0-1.0</a>
     | RSS <a href="atom.xml">atom.xml</a>

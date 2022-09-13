@@ -44,6 +44,7 @@ def render_blog_config(cfg):
 
 
 def get_all_articles():
+    """注意返回的不是 ArticleConfig, 而是 dict"""
     articles = Metadata_Folder_Path.glob(f"*{TOML_Suffix}")
     arts = []
     for art_path in articles:
@@ -59,7 +60,7 @@ def get_recent_articles(arts, blog_cfg):
 
 
 def get_articles_in_years(sorted_articles):
-    """全部年份的全部文章"""
+    """获取全部年份的全部文章"""
     arts = {}
     for art in sorted_articles:
         yyyy = art["ctime"][:4]
@@ -68,6 +69,13 @@ def get_articles_in_years(sorted_articles):
         else:
             arts[yyyy] = [art]
     return arts
+
+
+'''
+def get_articles_in_year(sorted_articles, year):
+    """获取指定年份的全部文章"""
+    return [art for art in sorted_articles if art["ctime"][:4] == year]
+'''
 
 
 def get_year_count(arts_in_years):
@@ -81,7 +89,6 @@ def articles_in_year(sorted_articles, year):
 
 def get_title_indexes(sorted_articles):
     indexes = {}
-    n = 1
     for art in sorted_articles:
         index = art["title"][:Title_Index_Length]
         if index in indexes:
@@ -89,16 +96,20 @@ def get_title_indexes(sorted_articles):
         else:
             indexes[index] = TitleIndex(
                 name=index,
-                id=f"{n:04}",
+                id=index.encode().hex(),
                 articles=[art]
             )
-            n += 1
     return indexes
 
 
 def render_index_html(recent_articles, blog_cfg, year_count):
     tmpl = jinja_env.get_template(tmplfile["index"])
-    html = tmpl.render(dict(blog=blog_cfg, articles=recent_articles, year_count=year_count))
+    html = tmpl.render(dict(
+        blog=blog_cfg,
+        articles=recent_articles,
+        year_count=year_count,
+        parent_dir=""
+    ))
     output_path = Output_Folder_Path.joinpath(tmplfile["index"])
     print(f"render and write {output_path}")
     output_path.write_text(html, encoding="utf-8")
@@ -106,10 +117,63 @@ def render_index_html(recent_articles, blog_cfg, year_count):
 
 def render_year_html(articles, blog_cfg, year):
     tmpl = jinja_env.get_template(tmplfile["year"])
-    html = tmpl.render(dict(articles=articles, blog=blog_cfg, year=year))
+    html = tmpl.render(dict(
+        articles=articles,
+        blog=blog_cfg,
+        year=year,
+        parent_dir=""
+    ))
     output_path = Output_Folder_Path.joinpath(f"{year}{HTML_Suffix}")
     print(f"render and write {output_path}")
     output_path.write_text(html, encoding="utf-8")
+
+
+def render_all_years(blog_cfg):
+    all_arts = get_all_articles()
+    recent_arts = get_recent_articles(all_arts, blog_cfg)
+    arts_in_years = get_articles_in_years(all_arts)
+    year_count = get_year_count(arts_in_years)
+    render_index_html(recent_arts, blog_cfg, year_count)
+    for year in arts_in_years:
+        render_year_html(arts_in_years[year], blog_cfg, year)
+
+
+def render_title_index_list(indexes, blog_cfg):
+    tmpl = jinja_env.get_template(tmplfile["title_index"])
+    html = tmpl.render(dict(
+        indexes=indexes.values(),
+        blog=blog_cfg,
+        parent_dir=""
+    ))
+    output_path = Output_Folder_Path.joinpath(tmplfile["title_index"])
+    print(f"render and write {output_path}")
+    output_path.write_text(html, encoding="utf-8")
+
+
+def render_title_index(tmpl, title_index, blog_cfg):
+    html = tmpl.render(dict(
+        index_name=title_index.name,
+        articles=title_index.articles,
+        blog=blog_cfg,
+        parent_dir="../"
+    ))
+    output_path = Indexes_Folder_Path.joinpath(f"{title_index.id}{HTML_Suffix}")
+    print(f"render and write {output_path}")
+    output_path.write_text(html, encoding="utf-8")
+
+
+def render_one_title_index(article, all_articles, blog_cfg):
+    indexes = get_title_indexes(all_articles)
+    index = article.title[:Title_Index_Length]
+
+    tmpl = jinja_env.get_template(tmplfile["indexes"])
+    render_title_index(tmpl, indexes[index], blog_cfg)
+
+    # 如果只有一篇文章，则可以认为该 index 是新增的。
+    if len(indexes[index].articles) == 1:
+        for k in indexes:
+            indexes[k].articles = []
+        render_title_index_list(indexes, blog_cfg)
 
 
 def render_all_title_indexes(blog_cfg):
@@ -118,24 +182,10 @@ def render_all_title_indexes(blog_cfg):
 
     tmpl = jinja_env.get_template(tmplfile["indexes"])
     for index in title_indexes.values():
-        html = tmpl.render(dict(
-            index_name=index.name,
-            articles=index.articles,
-            blog=blog_cfg
-        ))
-        output_path = Indexes_Folder_Path.joinpath(f"{index.id}{HTML_Suffix}")
-        print(f"render and write {output_path}")
-        output_path.write_text(html, encoding="utf-8")
+        render_title_index(tmpl, index, blog_cfg)
         index.articles = []
 
-    tmpl = jinja_env.get_template(tmplfile["title_index"])
-    html = tmpl.render(dict(
-        indexes=title_indexes.values(),
-        blog=blog_cfg
-    ))
-    output_path = Output_Folder_Path.joinpath(tmplfile["title_index"])
-    print(f"render and write {output_path}")
-    output_path.write_text(html, encoding="utf-8")
+    render_title_index_list(title_indexes, blog_cfg)
 
 
 def render_article_html(
@@ -146,7 +196,7 @@ def render_article_html(
     art = asdict(art_cfg)
     art["content"] = md_render(md_file.read_text(encoding="utf-8"))
     tmpl = jinja_env.get_template(tmplfile["article"])
-    html = tmpl.render(dict(blog=blog_cfg, art=art))
+    html = tmpl.render(dict(blog=blog_cfg, art=art, parent_dir=""))
     html_name = md_file.with_suffix(HTML_Suffix).name
     html_path = Output_Folder_Path.joinpath(html_name)
     print(f"render and write {html_path}")
@@ -195,7 +245,9 @@ def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
         arts_in_years = get_articles_in_years(all_arts)
         year_count = get_year_count(arts_in_years)
         render_index_html(recent_arts, blog_cfg, year_count)
-        render_year_html(recent_arts, blog_cfg, art_cfg.ctime[:4])
+        year = art_cfg.ctime[:4]
+        render_year_html(arts_in_years[year], blog_cfg, year)
+        render_one_title_index(art_cfg, all_arts, blog_cfg)
 
     return False
 

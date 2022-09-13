@@ -56,3 +56,23 @@ img {
   margin-bottom: 3rem;
   padding-top: 1.5rem;
 }
+
+#title-index-list {
+  margin-top: 5rem;
+  font-size: xx-large;
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 2rem;
+  column-gap: 2rem;
+}
+
+.TitleIndexItem {
+  color: white;
+  background-color: #A1A1AA;
+  padding: .35em .65em;
+  display: inline-block;
+}
+
+.TitleIndexItem a {
+  color: white;
+}

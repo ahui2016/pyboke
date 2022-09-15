@@ -9,7 +9,8 @@ import mistune
 from . import model
 from .model import RSS_Atom_XML, Blog_Config_Filename, Blog_Config_Path, \
     Templates_Folder_Path, TOML_Suffix, ArticleConfig, Metadata_Folder_Path, \
-    Draft_TMPL_Name, Output_Folder_Path, BlogConfig, HTML_Suffix, TitleIndex, Indexes_Folder_Path, Title_Index_Length
+    Draft_TMPL_Name, Output_Folder_Path, BlogConfig, HTML_Suffix, TitleIndex, Indexes_Folder_Path, Title_Index_Length, \
+    RSS_Entries_Max, MD_Suffix, RSS_Content_Size, RSS_Path
 
 # 注意: tmpl_render.py 不能 import util.py
 
@@ -43,6 +44,43 @@ def render_blog_config(cfg):
     Blog_Config_Path.write_text(blog_toml, encoding="utf-8")
 
 
+def blog_updated_at_now(cfg):
+    """更新博客的更新时间"""
+    cfg.blog_updated = model.now()
+    render_blog_config(cfg)
+
+
+def render_rss(cfg, force):
+    if cfg.blog_updated > cfg.rss_updated or force:
+        all_arts = get_all_articles()
+        rss_arts = get_rss_articles(all_arts)
+        really_render_rss(rss_arts, cfg)
+
+
+def really_render_rss(articles, blog_cfg):
+    tmpl = jinja_env.get_template(tmplfile["rss"])
+    xml = tmpl.render(dict(blog=blog_cfg, entries=articles))
+    print(f"render and write {RSS_Path}")
+    RSS_Path.write_text(xml, encoding="utf-8")
+    blog_cfg.rss_updated = model.now()
+    render_blog_config(blog_cfg)
+
+
+def get_rss_articles(sorted_articles):
+    """
+    sorted_articles 应已按文章创建时间排序。
+    sorted_articles 是一个 dict, 已经有 id, 详见 get_all_articles()
+    """
+    recent_arts = get_recent_articles(sorted_articles, RSS_Entries_Max)
+    for art in recent_arts:
+        md_file = Output_Folder_Path.joinpath(f"{art['id']}{MD_Suffix}")
+        content = md_file.read_text(encoding="utf-8")
+        if len(content) > RSS_Content_Size:
+            content = content[:RSS_Content_Size] + "..."
+        art["content"] = content
+    return recent_arts
+
+
 def get_all_articles():
     """注意返回的不是 ArticleConfig, 而是 dict"""
     articles = Metadata_Folder_Path.glob(f"*{TOML_Suffix}")
@@ -55,8 +93,8 @@ def get_all_articles():
     return sorted(arts, key=itemgetter("ctime"), reverse=True)
 
 
-def get_recent_articles(arts, blog_cfg):
-    return arts[:blog_cfg.home_recent_max]
+def get_recent_articles(sorted_articles, n):
+    return sorted_articles[:n]
 
 
 def get_articles_in_years(sorted_articles):
@@ -130,7 +168,7 @@ def render_year_html(articles, blog_cfg, year):
 
 def render_all_years(blog_cfg):
     all_arts = get_all_articles()
-    recent_arts = get_recent_articles(all_arts, blog_cfg)
+    recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
     arts_in_years = get_articles_in_years(all_arts)
     year_count = get_year_count(arts_in_years)
     render_index_html(recent_arts, blog_cfg, year_count)
@@ -171,8 +209,6 @@ def render_one_title_index(article, all_articles, blog_cfg):
 
     # 如果只有一篇文章，则可以认为该 index 是新增的。
     if len(indexes[index].articles) == 1:
-        for k in indexes:
-            indexes[k].articles = []
         render_title_index_list(indexes, blog_cfg)
 
 
@@ -183,7 +219,6 @@ def render_all_title_indexes(blog_cfg):
     tmpl = jinja_env.get_template(tmplfile["indexes"])
     for index in title_indexes.values():
         render_title_index(tmpl, index, blog_cfg)
-        index.articles = []
 
     render_title_index_list(title_indexes, blog_cfg)
 
@@ -236,18 +271,21 @@ def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
         art_toml_data = tmpl.render(dict(art=art_cfg))
         print(f"render and write {art_toml_path}")
         art_toml_path.write_text(art_toml_data, encoding="utf-8")
+        blog_updated_at_now(blog_cfg)
 
     # 需要渲染 html
     if need_to_render or force:
         render_article_html(md_file, blog_cfg, art_cfg)
         all_arts = get_all_articles()
-        recent_arts = get_recent_articles(all_arts, blog_cfg)
+        recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
         arts_in_years = get_articles_in_years(all_arts)
         year_count = get_year_count(arts_in_years)
         render_index_html(recent_arts, blog_cfg, year_count)
         year = art_cfg.ctime[:4]
         render_year_html(arts_in_years[year], blog_cfg, year)
         render_one_title_index(art_cfg, all_arts, blog_cfg)
+        rss_arts = get_rss_articles(all_arts)
+        really_render_rss(rss_arts, blog_cfg)
 
     return False
 

@@ -9,7 +9,7 @@ from . import (
     util,
 )
 from .model import BlogConfig, Articles_Folder_Path, Drafts_Folder_Path, Draft_TMPL_Path, Draft_TMPL_Name
-from .tmpl_render import render_article, render_all_title_indexes, render_all_years
+from .tmpl_render import render_article, render_all_title_indexes, render_all_years, render_rss
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -82,9 +82,6 @@ def new(ctx, filename):
     if file_path.exists():
         print(f"Error: 文件已存在: {filename}")
         ctx.exit()
-    if err := util.check_md_suffix(file_path):
-        print(f"Error: {err}")
-        ctx.exit()
 
     dst = Drafts_Folder_Path.joinpath(file_path.name)
     shutil.copyfile(Draft_TMPL_Path, dst)
@@ -129,10 +126,17 @@ def post(ctx, filename):
 )
 @click.option(
     "years",
-    "--years",
+    "--years-only",
     is_flag=True,
     default=False,
     help="强制渲染全部年份列表"
+)
+@click.option(
+    "rss",
+    "--rss-only",
+    is_flag=True,
+    default=False,
+    help="强制渲染 RSS (atom.xml)"
 )
 @click.option(
     "force",
@@ -142,7 +146,7 @@ def post(ctx, filename):
     help="强制渲染HTML"
 )
 @click.pass_context
-def render(ctx, filename, indexes, years, force):
+def render(ctx, filename, indexes, years, rss, force):
     """Render TOML and HTML. (渲染文章的 toml 和 html)
 
     Examples:
@@ -161,7 +165,10 @@ def render(ctx, filename, indexes, years, force):
     if years:
         render_all_years(cfg)
 
-    if indexes or years:
+    if rss:
+        render_rss(cfg, force=True)
+
+    if indexes or years or rss:
         ctx.exit()
 
     if len(filename) != 1:
@@ -175,10 +182,6 @@ def render(ctx, filename, indexes, years, force):
         ctx.exit()
 
     file_path = Path(filename)
-
-    if err := util.check_md_suffix(file_path):
-        print(f"Error: {err}")
-        ctx.exit()
 
     if err := render_article(file_path, cfg, force):
         print(f"Error: {err}")

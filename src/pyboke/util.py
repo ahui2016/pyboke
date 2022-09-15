@@ -7,7 +7,7 @@ from . import model
 from .model import Blog_Config_Path, CWD, Templates_Folder_Name, Articles_Folder_Path, \
     Templates_Folder_Path, Output_Folder_Path, BlogConfig, Pics_Folder_Path, RSS_Atom_XML, \
     Metadata_Folder_Path, Drafts_Folder_Path, Default_Theme_Name, Themes_Folder_Path, Theme_CSS_Path, MD_Suffix, \
-    Indexes_Folder_Path
+    Indexes_Folder_Path, Filename_Is_Year
 from .tmpl_render import render_blog_config, tmplfile
 
 
@@ -113,19 +113,21 @@ def ensure_blog_config():
 
 def check_filename(filename, parent_dir):
     """
-    确保 filename 只包含合法字符，并确保其在 parent_dir 里。
+    确保 filename 只包含合法字符，后缀名为 '.md', 并确保其在 parent_dir 里。
 
     :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
     """
     file = Path(filename)
+    if file.suffix != MD_Suffix:
+        return f"后缀名不是 '{MD_Suffix}': {file}"
+    if file.name.lower() == "index.md":
+        return "文件名不可用 index.md"
+    if len(file.stem) < 5 \
+            and not file.stem.startswith('0') \
+            and Filename_Is_Year.search(file.stem) is not None:
+        return "文件名不可像一个年份(4位数以下的数字)"
     if err := model.check_filename(file.name):
         return err
     if not file.parent.samefile(parent_dir):
         return f"不在 {parent_dir.name} 文件夹内: {filename}"
-    return False
-
-
-def check_md_suffix(file_path):
-    if file_path.suffix != MD_Suffix:
-        return f"后缀名不是 '{MD_Suffix}': {file_path}"
     return False

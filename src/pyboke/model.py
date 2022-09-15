@@ -38,13 +38,24 @@ Templates_Folder_Path = CWD.joinpath(Templates_Folder_Name)
 Themes_Folder_Path = Templates_Folder_Path.joinpath(Themes_Folder_Name)
 Draft_TMPL_Path = Templates_Folder_Path.joinpath(Draft_TMPL_Name)
 Blog_Config_Path = CWD.joinpath(Blog_Config_Filename)
+RSS_Path = CWD.joinpath(RSS_Atom_XML)
 
-# 文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线)。
 Filename_Forbid_Pattern = re.compile(r"[^._0-9a-zA-Z\-]")
+"""文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线)。"""
+
+Filename_Is_Year = re.compile(r"^[0-9]{1,4}")
+"""文件名不能像一个年份"""
+
 Markdown_Title_Pattern = re.compile(r"^(#{1,6}|>|1.|-|\*) (.+)")
 
-# 标题索引字数（以后有可能改成允许用户自定义）
 Title_Index_Length = 1
+"""标题索引字数（以后有可能改成允许用户自定义）"""
+
+RSS_Entries_Max = 10
+"""RSS 里最多可包含多少篇文章"""
+
+RSS_Content_Size = 256
+"""RSS 里每篇文章的摘要长度上限，单位: UTF8字符"""
 
 
 def now():

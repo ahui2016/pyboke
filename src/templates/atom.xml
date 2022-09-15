@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title>{{ blog.name }}</title>
+  <link ref="self" href="{{ blog.feed_link }}"/>
+  <link ref="alternate" href="{{ blog.website }}"/>
+  <updated>{{ blog.updated }}</updated>
+  <author>
+    <name>{{ blog.author }}</name>
+  </author>
+  <id>{{ blog.uuid }}</id>
+
+  {% for item in entries %}
+  <entry>
+    <title>{{ item.title }}</title>
+    <link ref="alternate" href="{{ blog.website + item.published[:4] + '/' + item.id + '.html'}}" />
+    <id>{{ blog.website }}/{{ item.id }}</id>
+    <published>{{ item.published }}</published>
+    <updated>{{ item.updated }}</updated>
+    <author><name>
+      {%- if item.author|length -%}
+        {{ item.author }}
+      {%- else -%}
+        {{ blog.author }}
+      {%- endif -%}
+    </name></author>
+    <content type="text">{{ item.content }}</content>
+  </entry>
+  {% endfor %}
+
+</feed>

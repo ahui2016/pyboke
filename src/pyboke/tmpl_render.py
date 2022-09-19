@@ -1,4 +1,3 @@
-import os
 from dataclasses import asdict
 from operator import itemgetter
 from pathlib import Path
@@ -9,8 +8,9 @@ import mistune
 from . import model
 from .model import RSS_Atom_XML, Blog_Config_Filename, Blog_Config_Path, \
     Templates_Folder_Path, TOML_Suffix, ArticleConfig, Metadata_Folder_Path, \
-    Draft_TMPL_Name, Output_Folder_Path, BlogConfig, HTML_Suffix, TitleIndex, Indexes_Folder_Path, Title_Index_Length, \
-    RSS_Entries_Max, MD_Suffix, RSS_Content_Size, RSS_Path
+    Draft_TMPL_Name, Output_Folder_Path, BlogConfig, HTML_Suffix, TitleIndex, \
+    Indexes_Folder_Path, Title_Index_Length, RSS_Entries_Max, MD_Suffix, RSS_Content_Size, \
+    RSS_Path, Articles_Folder_Path
 
 # 注意: tmpl_render.py 不能 import util.py
 
@@ -73,7 +73,7 @@ def get_rss_articles(sorted_articles):
     """
     recent_arts = get_recent_articles(sorted_articles, RSS_Entries_Max)
     for art in recent_arts:
-        md_file = Output_Folder_Path.joinpath(f"{art['id']}{MD_Suffix}")
+        md_file = Articles_Folder_Path.joinpath(f"{art['id']}{MD_Suffix}")
         content = md_file.read_text(encoding="utf-8")
         if len(content) > RSS_Content_Size:
             content = content[:RSS_Content_Size] + "..."

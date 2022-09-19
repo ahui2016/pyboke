@@ -39,14 +39,14 @@ def cli(ctx):
 ############
 # 以下是子命令
 
-def check_initialization(ctx) -> BlogConfig:
+def check_initialization(ctx, check_website=False) -> BlogConfig:
     """
     :return: 没有错误时返回 BlogConfig, 出错时直接退出程序。
     """
     if not util.blog_file_folders_exist():
         print("请先进入博客根目录，或使用 'boke init' 命令新建博客")
         ctx.exit()
-    err, cfg = util.ensure_blog_config()
+    err, cfg = util.ensure_blog_config(check_website)
     if err:
         print(err)
         ctx.exit()
@@ -122,21 +122,21 @@ def post(ctx, filename):
     "--title-index",
     is_flag=True,
     default=False,
-    help="强制渲染全部标题索引"
+    help="渲染全部标题索引"
 )
 @click.option(
     "years",
-    "--years-only",
+    "--years",
     is_flag=True,
     default=False,
-    help="强制渲染全部年份列表"
+    help="渲染全部年份列表"
 )
 @click.option(
     "rss",
     "--rss-only",
     is_flag=True,
     default=False,
-    help="强制渲染 RSS (atom.xml)"
+    help="只渲染 RSS (atom.xml)"
 )
 @click.option(
     "force",
@@ -155,8 +155,16 @@ def render(ctx, filename, indexes, years, rss, force):
 
     boke render -force articles/abcd.md
 
+    boke render --rss-only
+
     boke render -all
     """
+
+    if rss:
+        cfg = check_initialization(ctx, check_website=True)
+        render_rss(cfg, force=True)
+        ctx.exit()
+
     cfg = check_initialization(ctx)
 
     if indexes:
@@ -165,14 +173,11 @@ def render(ctx, filename, indexes, years, rss, force):
     if years:
         render_all_years(cfg)
 
-    if rss:
-        render_rss(cfg, force=True)
-
-    if indexes or years or rss:
+    if indexes or years:
         ctx.exit()
 
     if len(filename) != 1:
-        print("请指定 articles 文件夹中的 1 个文件")
+        print("请指定 articles 文件夹中的 1 个文件，更多用法: boke render -h")
         ctx.exit()
 
     filename = filename[0]

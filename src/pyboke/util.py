@@ -68,7 +68,7 @@ def blog_file_folders_exist():
         and Blog_Config_Path.exists()
 
 
-def ensure_blog_config():
+def ensure_blog_config(check_website=False):
     """
     :return: 发生错误时返回 (err_msg, None), 没有错误则返回 (False, BlogConfig)
     """
@@ -89,11 +89,16 @@ def ensure_blog_config():
     if cfg.home_recent_max <= 0:
         return f"请用文本编辑器打开 {Blog_Config_Path} 填写 title_length_max, 必须大于零", None
 
+    cfg.website = cfg.website.strip()
+    if check_website:
+        if cfg.website == "" or cfg.website == default_cfg.website:
+            return f"为了生成 RSS, 请用文本编辑器打开 {Blog_Config_Path} 填写博客网址(website)", None
+
     changed = False
 
-    cfg.website = cfg.website.strip()
     if cfg.website and cfg.website != default_cfg.website:
-        rss_link = cfg.website.removesuffix("/") + "/" + RSS_Atom_XML
+        cfg.website = cfg.website.removesuffix("/") + "/"
+        rss_link = cfg.website + RSS_Atom_XML
         if cfg.rss_link != rss_link:
             cfg.rss_link = rss_link
             changed = True

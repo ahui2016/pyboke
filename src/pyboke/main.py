@@ -7,9 +7,10 @@ from . import (
     __version__,
     __package_name__,
     util,
+    tmpl_render,
 )
-from .model import BlogConfig, Articles_Folder_Path, Drafts_Folder_Path, Draft_TMPL_Path, Draft_TMPL_Name
-from .tmpl_render import render_article, render_all_title_indexes, render_all_years, render_rss
+from .model import BlogConfig, Articles_Folder_Path, Drafts_Folder_Path, Draft_TMPL_Path
+from .tmpl_render import render_article, render_all_title_indexes, render_all_years, render_rss, render_index_html
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -168,10 +169,14 @@ def render(ctx, filename, indexes, years, rss, force):
     cfg = check_initialization(ctx)
 
     if indexes:
-        render_all_title_indexes(cfg)
+        all_articles = tmpl_render.get_all_articles()
+        render_all_title_indexes(all_articles, cfg)
 
     if years:
-        render_all_years(cfg)
+        all_articles = tmpl_render.get_all_articles()
+        arts_in_years = render_all_years(all_articles, cfg)
+        recent_arts = tmpl_render.get_recent_articles(all_articles, cfg.home_recent_max)
+        render_index_html(recent_arts, cfg, arts_in_years)
 
     if indexes or years:
         ctx.exit()

@@ -68,8 +68,8 @@ Static Blog Generator (极简博客生成器)
 
 有两种方法：
 
-1. 直接删除 articles 文件夹里的文件，然后执行 `boke render -all`
-2. 使用命令 `boke delete articles/filename`
+1. 使用命令 `boke delete articles/filename`
+2. 直接删除 articles 文件夹里的文件，然后执行 `boke render -all`
 
 ## RSS
 

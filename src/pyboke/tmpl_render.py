@@ -140,12 +140,12 @@ def get_title_indexes(sorted_articles):
     return indexes
 
 
-def render_index_html(recent_articles, blog_cfg, year_count):
+def render_index_html(recent_articles, blog_cfg, arts_in_years):
     tmpl = jinja_env.get_template(tmplfile["index"])
     html = tmpl.render(dict(
         blog=blog_cfg,
         articles=recent_articles,
-        year_count=year_count,
+        year_count=get_year_count(arts_in_years),
         parent_dir=""
     ))
     output_path = Output_Folder_Path.joinpath(tmplfile["index"])
@@ -166,14 +166,15 @@ def render_year_html(articles, blog_cfg, year):
     output_path.write_text(html, encoding="utf-8")
 
 
-def render_all_years(blog_cfg):
-    all_arts = get_all_articles()
-    recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
-    arts_in_years = get_articles_in_years(all_arts)
-    year_count = get_year_count(arts_in_years)
-    render_index_html(recent_arts, blog_cfg, year_count)
+def render_all_years(articles, blog_cfg):
+    """注意：通常还需要渲染首页。
+
+    :return: 返回 arts_in_years 方便在外面渲染首页。
+    """
+    arts_in_years = get_articles_in_years(articles)
     for year in arts_in_years:
         render_year_html(arts_in_years[year], blog_cfg, year)
+    return arts_in_years
 
 
 def render_title_index_list(indexes, blog_cfg):
@@ -212,9 +213,8 @@ def render_one_title_index(article, all_articles, blog_cfg):
         render_title_index_list(indexes, blog_cfg)
 
 
-def render_all_title_indexes(blog_cfg):
-    all_articles = get_all_articles()
-    title_indexes = get_title_indexes(all_articles)
+def render_all_title_indexes(articles, blog_cfg):
+    title_indexes = get_title_indexes(articles)
 
     tmpl = jinja_env.get_template(tmplfile["indexes"])
     for index in title_indexes.values():
@@ -238,13 +238,65 @@ def render_article_html(
     html_path.write_text(html, encoding="utf-8")
 
 
+def render_all_articles(blog_cfg: BlogConfig, force: bool):
+    """
+    :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
+    """
+
+    # TODO: delete files
+
+    all_md_files = Articles_Folder_Path.glob(f"*{MD_Suffix}")
+    updated_articles = []
+    for md_file in all_md_files:
+        err, art_cfg = add_or_update_article(md_file, blog_cfg, force)
+        if err:
+            return err
+        if art_cfg:
+            updated_articles.append(art_cfg)
+
+    render_all_title_indexes(updated_articles, blog_cfg)
+
+    all_arts = get_all_articles()
+    recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
+    arts_in_years = render_all_years(all_arts, blog_cfg)
+    render_index_html(recent_arts, blog_cfg, arts_in_years)
+
+    rss_arts = get_rss_articles(all_arts)
+    really_render_rss(rss_arts, blog_cfg)
+
+
 def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     """
     :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
     """
+    err, art_cfg = add_or_update_article(md_file, blog_cfg, force)
+
+    if err:
+        return err
+
+    if art_cfg:
+        all_arts = get_all_articles()
+        recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
+        arts_in_years = get_articles_in_years(all_arts)
+        render_index_html(recent_arts, blog_cfg, arts_in_years)
+        year = art_cfg.ctime[:4]
+        render_year_html(arts_in_years[year], blog_cfg, year)
+        render_one_title_index(art_cfg, all_arts, blog_cfg)
+        rss_arts = get_rss_articles(all_arts)
+        really_render_rss(rss_arts, blog_cfg)
+
+    return False
+
+
+def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
+    """
+    在渲染全部文章时，本函数处理其中一个文件。
+
+    :return: 发生错误时返回 (str, None), 否则反回 (None, ArticleConfig) 或 (None, None).
+    """
     art_cfg_new = ArticleConfig.from_md_file(md_file, blog_cfg.title_length_max)
     if not art_cfg_new.title:
-        return "无法获取文章标题，请修改文章的标题(文件的第一行内容)"
+        return "无法获取文章标题，请修改文章的标题(文件的第一行内容)", None
 
     art_toml_path = art_cfg_path_from_md_path(md_file)
     need_to_render = False
@@ -276,18 +328,9 @@ def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     # 需要渲染 html
     if need_to_render or force:
         render_article_html(md_file, blog_cfg, art_cfg)
-        all_arts = get_all_articles()
-        recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
-        arts_in_years = get_articles_in_years(all_arts)
-        year_count = get_year_count(arts_in_years)
-        render_index_html(recent_arts, blog_cfg, year_count)
-        year = art_cfg.ctime[:4]
-        render_year_html(arts_in_years[year], blog_cfg, year)
-        render_one_title_index(art_cfg, all_arts, blog_cfg)
-        rss_arts = get_rss_articles(all_arts)
-        really_render_rss(rss_arts, blog_cfg)
+        return None, art_cfg
 
-    return False
+    return None, None
 
 
 def art_cfg_path_from_md_path(md_path):

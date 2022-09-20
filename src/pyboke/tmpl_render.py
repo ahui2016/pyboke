@@ -18,9 +18,6 @@ loader = jinja2.FileSystemLoader(Templates_Folder_Path)
 jinja_env = jinja2.Environment(
     loader=loader, autoescape=jinja2.select_autoescape()
 )
-md_render = mistune.create_markdown(
-    plugins=["strikethrough", "footnotes", "table"]
-)
 
 # 渲染时，除了 tmplfile 之外, templates 文件夹里的全部文件都会被复制到 output 文件夹。
 tmplfile = dict(
@@ -224,12 +221,13 @@ def render_all_title_indexes(articles, blog_cfg):
 
 
 def render_article_html(
-        md_file: Path,
+        md_file : Path,
+        md_text : str,
         blog_cfg: BlogConfig,
-        art_cfg: ArticleConfig,
+        art_cfg : ArticleConfig,
 ):
     art = asdict(art_cfg)
-    art["content"] = md_render(md_file.read_text(encoding="utf-8"))
+    art["content"] = mistune.html(md_text)
     tmpl = jinja_env.get_template(tmplfile["article"])
     html = tmpl.render(dict(blog=blog_cfg, art=art, parent_dir=""))
     html_name = md_file.with_suffix(HTML_Suffix).name
@@ -253,6 +251,9 @@ def render_all_articles(blog_cfg: BlogConfig, force: bool):
             return err
         if art_cfg:
             updated_articles.append(art_cfg)
+
+    if len(updated_articles) == 0:
+        return False
 
     render_all_title_indexes(updated_articles, blog_cfg)
 
@@ -294,7 +295,8 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
 
     :return: 发生错误时返回 (str, None), 否则反回 (None, ArticleConfig) 或 (None, None).
     """
-    art_cfg_new = ArticleConfig.from_md_file(md_file, blog_cfg.title_length_max)
+    md_file_data = md_file.read_bytes()
+    art_cfg_new = ArticleConfig.from_md_file(md_file_data, blog_cfg.title_length_max)
     if not art_cfg_new.title:
         return "无法获取文章标题，请修改文章的标题(文件的第一行内容)", None
 
@@ -327,7 +329,7 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
 
     # 需要渲染 html
     if need_to_render or force:
-        render_article_html(md_file, blog_cfg, art_cfg)
+        render_article_html(md_file, md_file_data.decode(), blog_cfg, art_cfg)
         return None, art_cfg
 
     return None, None

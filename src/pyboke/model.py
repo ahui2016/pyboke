@@ -97,27 +97,30 @@ class BlogConfig:
 
 @dataclass
 class ArticleConfig:
-    title: str  # 文章标题 [不需要手动填写，会自动获取]
-    author: str  # 文章作者 [通常留空，自动等同于博客作者]
-    ctime: str  # 文章创建时间
-    mtime: str  # 文章修改时间
+    title:    str  # 文章标题 [不需要手动填写，会自动获取]
+    author:   str  # 文章作者 [通常留空，自动等同于博客作者]
+    ctime:    str  # 文章创建时间
+    mtime:    str  # 文章修改时间
     checksum: str  # sha1, 用来判断文章内容有无变更
 
     @classmethod
-    def from_md_file(cls, md_file, title_length):
-        with open(md_file, "rb") as f:
-            data = f.read()
-            first_line = get_first_line(data)
-            title = get_md_title(first_line, title_length)
-            checksum = hashlib.sha1(data).hexdigest()
-            ctime = now()
-            return ArticleConfig(
-                title=title,
-                author="",
-                ctime=ctime,
-                mtime=ctime,
-                checksum=checksum
-            )
+    def from_md_file(cls, md_file_data, title_length):
+        """
+        md_file_data 是文件的二进制数据。
+        """
+
+        first_line = get_first_line(md_file_data)
+        title      = get_md_title(first_line, title_length)
+        checksum   = hashlib.sha1(data).hexdigest()
+        ctime      = now()
+
+        return ArticleConfig(
+            title    = title,
+            author   = "",
+            ctime    = ctime,
+            mtime    = ctime,
+            checksum = checksum
+        )
 
     @classmethod
     def loads(cls, file):

@@ -75,6 +75,18 @@ Static Blog Generator (极简博客生成器)
 大多数情况下不需要强制渲染，但有一种情况：修改了 blog.toml 里的博客名称、作者名称
 等信息后，需要执行 `boke render -force -all` 强制渲全部文章。
 
+### 手动更新文章创建日期
+
+如果想修改一篇文章的创建日期，可手动修改该文章的 toml 文件中的 ctime,
+然后执行命令 `boke render --years`
+
+### 手动更新文章修改日期
+
+如果修改了文章的内容，在执行上述 `boke render` 相关命令时会自动更新文章的修改日期。
+
+如果想手动设定一篇文章的修改日期，可手动修改该文章的 toml 文件中的 mtime,
+然后执行命令 `boke render articles/XXX.md -force`
+
 ## 删除文章
 
 有两种方法：

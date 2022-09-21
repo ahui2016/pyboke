@@ -10,7 +10,8 @@ from . import (
     tmpl_render,
 )
 from .model import BlogConfig, Articles_Folder_Path, Drafts_Folder_Path, Draft_TMPL_Path
-from .tmpl_render import render_article, render_all_title_indexes, render_all_years, render_rss, render_index_html
+from .tmpl_render import render_article, render_all_title_indexes, render_all_years, render_rss, render_index_html, \
+    render_all_articles
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -140,6 +141,13 @@ def post(ctx, filename):
     help="只渲染 RSS (atom.xml)"
 )
 @click.option(
+    "render_all",
+    "-all",
+    is_flag=True,
+    default=False,
+    help="渲染全部文章"
+)
+@click.option(
     "force",
     "-force",
     is_flag=True,
@@ -147,7 +155,7 @@ def post(ctx, filename):
     help="强制渲染HTML"
 )
 @click.pass_context
-def render(ctx, filename, indexes, years, rss, force):
+def render(ctx, filename, indexes, years, rss, render_all, force):
     """Render TOML and HTML. (渲染文章的 toml 和 html)
 
     Examples:
@@ -178,7 +186,11 @@ def render(ctx, filename, indexes, years, rss, force):
         recent_arts = tmpl_render.get_recent_articles(all_articles, cfg.home_recent_max)
         render_index_html(recent_arts, cfg, arts_in_years)
 
-    if indexes or years:
+    if render_all:
+        if err := render_all_articles(cfg, force):
+            print(f"Error: {err}")
+
+    if indexes or years or render_all:
         ctx.exit()
 
     if len(filename) != 1:

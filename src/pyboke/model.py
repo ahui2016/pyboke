@@ -111,7 +111,7 @@ class ArticleConfig:
 
         first_line = get_first_line(md_file_data)
         title      = get_md_title(first_line, title_length)
-        checksum   = hashlib.sha1(data).hexdigest()
+        checksum   = hashlib.sha1(md_file_data).hexdigest()
         ctime      = now()
 
         return ArticleConfig(

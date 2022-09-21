@@ -250,7 +250,7 @@ def render_all_articles(blog_cfg: BlogConfig, force: bool):
         if err:
             return err
         if art_cfg:
-            updated_articles.append(art_cfg)
+            updated_articles.append(asdict(art_cfg))
 
     if len(updated_articles) == 0:
         return False
@@ -264,6 +264,7 @@ def render_all_articles(blog_cfg: BlogConfig, force: bool):
 
     rss_arts = get_rss_articles(all_arts)
     really_render_rss(rss_arts, blog_cfg)
+    return False
 
 
 def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):

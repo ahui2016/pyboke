@@ -116,13 +116,12 @@ def ensure_blog_config(check_website=False):
     return False, cfg
 
 
-def check_filename(filename, parent_dir):
+def check_filename(file: Path, parent_dir):
     """
-    确保 filename 只包含合法字符，后缀名为 '.md', 并确保其在 parent_dir 里。
+    确保 filepath 只包含合法字符，后缀名为 '.md', 并确保其在 parent_dir 里。
 
     :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
     """
-    file = Path(filename)
     if file.suffix != MD_Suffix:
         return f"后缀名不是 '{MD_Suffix}': {file}"
     if file.name.lower() == "index.md":
@@ -134,5 +133,5 @@ def check_filename(filename, parent_dir):
     if err := model.check_filename(file.name):
         return err
     if not file.parent.samefile(parent_dir):
-        return f"不在 {parent_dir.name} 文件夹内: {filename}"
+        return f"不在 {parent_dir.name} 文件夹内: {file}"
     return False

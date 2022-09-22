@@ -233,8 +233,9 @@ def render_one_title_index(article, all_articles, blog_cfg):
         render_title_index_list(indexes, blog_cfg)
 
 
-def render_all_title_indexes(articles, blog_cfg):
-    title_indexes = get_title_indexes(articles)
+def render_all_title_indexes(all_articles, blog_cfg):
+    """已知问题：不会触发删除，但问题不大，暂不处理。"""
+    title_indexes = get_title_indexes(all_articles)
 
     tmpl = jinja_env.get_template(tmplfile["indexes"])
     for index in title_indexes.values():
@@ -258,14 +259,35 @@ def render_article_html(
     html_path.write_text(html, encoding="utf-8")
 
 
+def delete_articles(all_md_files):
+    """
+    :return: 需要删除的文件的数量 len(to_be_delete)
+    """
+    all_id = [file.stem for file in all_md_files]
+    all_metadata = Metadata_Folder_Path.glob(f"*{TOML_Suffix}")
+    to_be_delete = [file for file in all_metadata if file.stem not in all_id]
+    result = len(to_be_delete)
+    if result == 0:
+        return 0
+
+    for file in to_be_delete:
+        print(f"DELETE {file}")
+        file.unlink()
+        html_path = html_path_from_md_path(file)
+        print(f"DELETE {html_path}")
+        html_path.unlink()
+
+    return result
+
+
 def render_all_articles(blog_cfg: BlogConfig, force: bool):
     """
     :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
     """
-
-    # TODO: delete files
-
     all_md_files = Articles_Folder_Path.glob(f"*{MD_Suffix}")
+    all_md_files = list(all_md_files)
+    deleted_count = delete_articles(all_md_files)
+
     updated_articles = []
     for md_file in all_md_files:
         err, art_cfg = add_or_update_article(md_file, blog_cfg, force)
@@ -274,16 +296,14 @@ def render_all_articles(blog_cfg: BlogConfig, force: bool):
         if art_cfg:
             updated_articles.append(asdict(art_cfg))
 
-    if len(updated_articles) == 0:
+    if deleted_count + len(updated_articles) == 0:
         return False
 
-    render_all_title_indexes(updated_articles, blog_cfg)
-
     all_arts = get_all_articles()
+    render_all_title_indexes(all_arts, blog_cfg)
     recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
     arts_in_years = render_all_years(all_arts, blog_cfg)
     render_index_html(recent_arts, blog_cfg, arts_in_years)
-
     rss_arts = get_rss_articles(all_arts)
     really_render_rss(rss_arts, blog_cfg)
     return False
@@ -380,7 +400,7 @@ def art_cfg_path_from_md_path(md_path):
     return Metadata_Folder_Path.joinpath(name)
 
 
-def html_path_from_md_path(md_path):
-    """根据 markdown 文件的路径得出 html 文件的路径"""
-    name = md_path.with_suffix(HTML_Suffix).name
+def html_path_from_md_path(article_path):
+    """根据文章 (markdown 或 toml) 的路径得出 html 文件的路径"""
+    name = article_path.with_suffix(HTML_Suffix).name
     return Output_Folder_Path.joinpath(name)

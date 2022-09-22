@@ -97,11 +97,20 @@ class BlogConfig:
 
 @dataclass
 class ArticleConfig:
-    title:    str  # 文章标题 [不需要手动填写，会自动获取]
-    author:   str  # 文章作者 [通常留空，自动等同于博客作者]
-    ctime:    str  # 文章创建时间
-    mtime:    str  # 文章修改时间
-    checksum: str  # sha1, 用来判断文章内容有无变更
+    title   : str   # 文章标题 [不需要手动填写，会自动获取]
+    author  : str   # 文章作者 [通常留空，自动等同于博客作者]
+    ctime   : str   # 文章创建时间
+    mtime   : str   # 文章修改时间
+    checksum: str   # sha1, 用来判断文章内容有无变更
+    photo_n : str   # 正在使用第几张图片 [不可手动修改]
+    photos  : list  # 图片地址 (array of tables)
+
+    '''其中，图片地址用 JSON 描述是：
+    "photos": [
+        [ "./articles/pics/abc.jpg", "https://example.com/abc.jpg" ],
+        [ "./articles/pics/def.jpg", "https://example.com/def.jpg" ],
+    ]
+    '''
 
     @classmethod
     def from_md_file(cls, md_file_data, title_length):

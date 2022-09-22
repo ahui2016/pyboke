@@ -14,3 +14,18 @@ mtime = '{{art.mtime}}'
 
 # sha1, 用来判断文章内容有无变更 [请勿手动修改]
 checksum = '{{art.checksum}}'
+
+# 正在使用第几张图片 [不可手动修改]
+photo_n = {{art.photo_n}}
+
+# 图片地址 (array of tables)
+photos = [
+{% for photos in art.photos %}
+    [
+    {% for photo in photos %}
+    '''{photo}''',
+    {% endfor %}
+    ],
+]
+{% endfor %}
+photos  : list

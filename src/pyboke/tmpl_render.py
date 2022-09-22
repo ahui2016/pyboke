@@ -123,6 +123,9 @@ def articles_in_year(sorted_articles, year):
 
 
 def get_title_indexes(sorted_articles):
+    """
+    :return: dict(index, articles)
+    """
     indexes = {}
     for art in sorted_articles:
         index = art["title"][:Title_Index_Length]
@@ -148,6 +151,17 @@ def render_index_html(recent_articles, blog_cfg, arts_in_years):
     output_path = Output_Folder_Path.joinpath(tmplfile["index"])
     print(f"render and write {output_path}")
     output_path.write_text(html, encoding="utf-8")
+
+
+def render_or_delete_year_html(arts_in_years, blog_cfg, year):
+    if year in arts_in_years:
+        render_year_html(arts_in_years[year], blog_cfg, year)
+        return
+
+    output_path = Output_Folder_Path.joinpath(f"{year}{HTML_Suffix}")
+    if output_path.exists():
+        print(f"DELETE {output_path}")
+        output_path.unlink()
 
 
 def render_year_html(articles, blog_cfg, year):
@@ -202,6 +216,15 @@ def render_one_title_index(article, all_articles, blog_cfg):
     indexes = get_title_indexes(all_articles)
     index = article.title[:Title_Index_Length]
 
+    if index not in indexes:
+        index_id = index.encode().hex()
+        output_path = Indexes_Folder_Path.joinpath(f"{index_id}{HTML_Suffix}")
+        if output_path.exists():
+            print(f"DELETE {output_path}")
+            output_path.unlink()
+            render_title_index_list(indexes, blog_cfg)
+        return
+
     tmpl = jinja_env.get_template(tmplfile["indexes"])
     render_title_index(tmpl, indexes[index], blog_cfg)
 
@@ -230,8 +253,7 @@ def render_article_html(
     art["content"] = mistune.html(md_text)
     tmpl = jinja_env.get_template(tmplfile["article"])
     html = tmpl.render(dict(blog=blog_cfg, art=art, parent_dir=""))
-    html_name = md_file.with_suffix(HTML_Suffix).name
-    html_path = Output_Folder_Path.joinpath(html_name)
+    html_path = html_path_from_md_path(md_file)
     print(f"render and write {html_path}")
     html_path.write_text(html, encoding="utf-8")
 
@@ -267,6 +289,30 @@ def render_all_articles(blog_cfg: BlogConfig, force: bool):
     return False
 
 
+def update_on_article_changed(art_cfg, blog_cfg):
+    all_arts = get_all_articles()
+    recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
+    arts_in_years = get_articles_in_years(all_arts)
+    render_index_html(recent_arts, blog_cfg, arts_in_years)
+    year = art_cfg.ctime[:4]
+    render_or_delete_year_html(arts_in_years, blog_cfg, year)
+    render_one_title_index(art_cfg, all_arts, blog_cfg)
+    rss_arts = get_rss_articles(all_arts)
+    really_render_rss(rss_arts, blog_cfg)
+
+
+def delete_article(md_path, toml_path, art_cfg, blog_cfg):
+    print(f"DELETE {md_path}")
+    md_path.unlink()
+    print(f"DELETE {toml_path}")
+    toml_path.unlink()
+    html_path = html_path_from_md_path(md_path)
+    print(f"DELETE {html_path}")
+    html_path.unlink()
+    blog_updated_at_now(blog_cfg)
+    update_on_article_changed(art_cfg, blog_cfg)
+
+
 def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     """
     :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
@@ -277,15 +323,7 @@ def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
         return err
 
     if art_cfg:
-        all_arts = get_all_articles()
-        recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
-        arts_in_years = get_articles_in_years(all_arts)
-        render_index_html(recent_arts, blog_cfg, arts_in_years)
-        year = art_cfg.ctime[:4]
-        render_year_html(arts_in_years[year], blog_cfg, year)
-        render_one_title_index(art_cfg, all_arts, blog_cfg)
-        rss_arts = get_rss_articles(all_arts)
-        really_render_rss(rss_arts, blog_cfg)
+        update_on_article_changed(art_cfg, blog_cfg)
 
     return False
 
@@ -340,3 +378,9 @@ def art_cfg_path_from_md_path(md_path):
     """根据 markdown 文件的路径得出 toml 文件的路径"""
     name = md_path.with_suffix(TOML_Suffix).name
     return Metadata_Folder_Path.joinpath(name)
+
+
+def html_path_from_md_path(md_path):
+    """根据 markdown 文件的路径得出 html 文件的路径"""
+    name = md_path.with_suffix(HTML_Suffix).name
+    return Output_Folder_Path.joinpath(name)

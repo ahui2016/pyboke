@@ -11,7 +11,7 @@ from . import (
 )
 from .model import BlogConfig, Articles_Folder_Path, Drafts_Folder_Path, Draft_TMPL_Path, ArticleConfig
 from .tmpl_render import render_article, render_all_title_indexes, render_all_years, render_rss, render_index_html, \
-    render_all_articles, art_cfg_path_from_md_path, blog_updated_at_now
+    render_all_articles, art_cfg_path_from_md_path, delete_article
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -211,14 +211,14 @@ def render(ctx, filename, indexes, years, rss, render_all, force):
 @cli.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("filename", nargs=1, type=click.Path(exists=True))
 @click.pass_context
-def render(ctx, filename):
+def delete(ctx, filename):
     """Delete an article. (删除文章)
 
     Examples:
 
     boke delete articles/abc.md
     """
-    cfg = check_initialization(ctx)
+    blog_cfg = check_initialization(ctx)
     md_path = Path(filename)
     if err := util.check_filename(md_path, Articles_Folder_Path):
         print(f"Error: {err}")
@@ -228,6 +228,4 @@ def render(ctx, filename):
     art_cfg = ArticleConfig.loads(art_cfg_path)
     print(f"Title: {art_cfg.title}")
     click.confirm("Confirm deletion (确认删除，不可恢复)", abort=True)
-    md_path.unlink()
-    art_cfg_path.unlink()
-    blog_updated_at_now(cfg)
+    delete_article(md_path, art_cfg_path, art_cfg, blog_cfg)

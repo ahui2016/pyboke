@@ -128,14 +128,14 @@ def post(ctx, filename):
 )
 @click.option(
     "years",
-    "--years",
+    "-years",
     is_flag=True,
     default=False,
     help="渲染全部年份列表"
 )
 @click.option(
     "rss",
-    "--rss-only",
+    "-rss",
     is_flag=True,
     default=False,
     help="只渲染 RSS (atom.xml)"
@@ -163,8 +163,6 @@ def render(ctx, filename, indexes, years, rss, render_all, force):
     boke render articles/abc.md
 
     boke render -force articles/abcd.md
-
-    boke render --rss-only
 
     boke render -all
     """

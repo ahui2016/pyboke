@@ -51,10 +51,13 @@ def render_rss(cfg, force):
     if cfg.blog_updated > cfg.rss_updated or force:
         all_arts = get_all_articles()
         rss_arts = get_rss_articles(all_arts)
-        really_render_rss(rss_arts, cfg)
+        really_render_rss(rss_arts, cfg, force=True)
 
 
-def really_render_rss(articles, blog_cfg):
+def really_render_rss(articles, blog_cfg, force=False):
+    """如果不强制渲染，则只在已经存在 RSS (atom.xml) 时才渲染。"""
+    if not force and not RSS_Path.exists():
+        return
     tmpl = jinja_env.get_template(tmplfile["rss"])
     xml = tmpl.render(dict(blog=blog_cfg, entries=articles))
     print(f"render and write {RSS_Path}")

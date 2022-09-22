@@ -78,7 +78,7 @@ Static Blog Generator (极简博客生成器)
 ### 手动更新文章创建日期
 
 如果想修改一篇文章的创建日期，可手动修改该文章的 toml 文件中的 ctime,
-然后执行命令 `boke render --years`
+然后执行命令 `boke render -years`
 
 ### 手动更新文章修改日期
 
@@ -97,7 +97,8 @@ Static Blog Generator (极简博客生成器)
 ## RSS
 
 注意，在正式对外发布你的博客时，请在 blog.toml 中填写你的博客网址 (website),
-必要时可执行 `boke render --rss-only` 重新渲染 atom.xml
+第一次生成 atom.xml 需要执行 `boke render -rss`,
+后续在执行其它命令时会自动重新渲染 atom.xml
 
 本软件只提供有限的 RSS 功能：
 

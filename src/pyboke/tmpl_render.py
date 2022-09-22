@@ -191,10 +191,18 @@ def render_all_years(articles, blog_cfg):
     return arts_in_years
 
 
+def sort_dict_by_key(d: dict) -> list:
+    keys = sorted(d.keys())
+    values = []
+    for key in keys:
+        values.append(d[key])
+    return values
+
+
 def render_title_index_list(indexes, blog_cfg):
     tmpl = jinja_env.get_template(tmplfile["title_index"])
     html = tmpl.render(dict(
-        indexes=indexes.values(),
+        indexes=sort_dict_by_key(indexes),
         blog=blog_cfg,
         parent_dir=""
     ))

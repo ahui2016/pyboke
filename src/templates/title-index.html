@@ -14,8 +14,20 @@
 <div id="title-index-list">
   {% for item in indexes %}
   <div class="TitleIndexItem">
-    <a href="indexes/{{item.id}}.html">{{item.name}}</a>
+    <a href="#i{{item.id}}">{{item.name}}</a>
   </div>
   {% endfor %}
 </div>
+
+<div id="title-indexes">
+  {% for item in indexes %}
+  <h3 id="i{{item.id}}">{{ item.name }}</h3>
+  <ul>
+    {% for art in item.articles %}
+    <li>{{ art.ctime[:10] }} <a href="{{art.id}}.html">{{art.title}}</a></li>
+    {% endfor %}
+  </ul>
+  {% endfor %}
+</div>
+
 {% endblock %}

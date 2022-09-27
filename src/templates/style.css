@@ -76,3 +76,11 @@ img {
 .TitleIndexItem a {
   color: white;
 }
+
+#title-indexes {
+  margin-bottom: 5rem;
+}
+
+#title-index {
+  margin-bottom: 5rem;
+}

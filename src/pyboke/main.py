@@ -9,9 +9,10 @@ from . import (
     util,
     tmpl_render,
 )
-from .model import BlogConfig, Articles_Folder_Path, Drafts_Folder_Path, Draft_TMPL_Path, ArticleConfig
-from .tmpl_render import render_article, render_all_title_indexes, render_rss, render_index_html, \
-    render_all_articles, art_cfg_path_from_md_path, delete_article, render_years_html
+from .model import BlogConfig, Articles_Folder_Path, Drafts_Folder_Path, \
+    Draft_TMPL_Path, ArticleConfig
+from .tmpl_render import render_article, render_rss, render_all_articles, \
+    art_cfg_path_from_md_path, delete_article, render_years_html, render_title_index
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -176,7 +177,7 @@ def render(ctx, filename, indexes, years, rss, render_all, force):
 
     if indexes:
         all_articles = tmpl_render.get_all_articles()
-        render_all_title_indexes(all_articles, cfg)
+        render_title_index(all_articles, cfg)
 
     if years:
         all_articles = tmpl_render.get_all_articles()
@@ -225,4 +226,4 @@ def delete(ctx, filename):
     art_cfg = ArticleConfig.loads(art_cfg_path)
     print(f"Title: {art_cfg.title}")
     click.confirm("Confirm deletion (确认删除，不可恢复)", abort=True)
-    delete_article(md_path, art_cfg_path, art_cfg, blog_cfg)
+    delete_article(md_path, art_cfg_path, blog_cfg)

@@ -7,7 +7,7 @@ from . import model
 from .model import Blog_Config_Path, CWD, Templates_Folder_Name, Articles_Folder_Path, \
     Templates_Folder_Path, Output_Folder_Path, BlogConfig, Pics_Folder_Path, RSS_Atom_XML, \
     Metadata_Folder_Path, Drafts_Folder_Path, Default_Theme_Name, Themes_Folder_Path, \
-    Theme_CSS_Path, MD_Suffix, Indexes_Folder_Path
+    Theme_CSS_Path, MD_Suffix
 from .tmpl_render import render_blog_config, tmplfile
 
 
@@ -50,7 +50,6 @@ def init_blog():
     Pics_Folder_Path.mkdir()
     Metadata_Folder_Path.mkdir()
     Output_Folder_Path.mkdir()
-    Indexes_Folder_Path.mkdir()
     copy_templates()
     copy_static_files()
     copy_theme_css(Default_Theme_Name)

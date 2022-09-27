@@ -88,6 +88,7 @@ def get_all_articles():
         art = ArticleConfig.loads(art_path)
         art = asdict(art)
         art["id"] = art_path.stem
+        del art["photos"]
         arts.append(art)
     return sorted(arts, key=itemgetter("ctime"), reverse=True)
 
@@ -126,19 +127,21 @@ def get_title_indexes(sorted_articles):
     return indexes
 
 
-def sort_dict_by_key(d: dict) -> list:
-    keys = sorted(d.keys())
-    values = []
+def sort_by_title_index(indexes: dict) -> list:
+    keys = sorted(indexes.keys())
+    result = []
     for key in keys:
-        values.append(d[key])
-    return values
+        item = indexes[key]
+        item.articles = sorted(item.articles, key=itemgetter("title"))
+        result.append(item)
+    return result
 
 
 def render_title_index(all_articles, blog_cfg):
     indexes = get_title_indexes(all_articles)
     tmpl = jinja_env.get_template(tmplfile["title_index"])
     html = tmpl.render(dict(
-        indexes=sort_dict_by_key(indexes),
+        indexes=sort_by_title_index(indexes),
         blog=blog_cfg,
         parent_dir=""
     ))

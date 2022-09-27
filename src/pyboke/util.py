@@ -7,7 +7,7 @@ from . import model
 from .model import Blog_Config_Path, CWD, Templates_Folder_Name, Articles_Folder_Path, \
     Templates_Folder_Path, Output_Folder_Path, BlogConfig, Pics_Folder_Path, RSS_Atom_XML, \
     Metadata_Folder_Path, Drafts_Folder_Path, Default_Theme_Name, Themes_Folder_Path, \
-    Theme_CSS_Path, MD_Suffix, Indexes_Folder_Path, Filename_Is_Year
+    Theme_CSS_Path, MD_Suffix, Indexes_Folder_Path
 from .tmpl_render import render_blog_config, tmplfile
 
 
@@ -124,12 +124,9 @@ def check_filename(file: Path, parent_dir):
     """
     if file.suffix != MD_Suffix:
         return f"后缀名不是 '{MD_Suffix}': {file}"
-    if file.name.lower() == "index.md":
-        return "文件名不可用 index.md"
-    if len(file.stem) < 5 \
-            and not file.stem.startswith('0') \
-            and Filename_Is_Year.search(file.stem) is not None:
-        return "文件名不可像一个年份(4位数以下的数字)"
+
+    if file.name.lower() in ["index.md", "years.md", "title-index.md"]:
+        return f"文件名不可用 {file.name}"
     if err := model.check_filename(file.name):
         return err
     if not file.parent.samefile(parent_dir):

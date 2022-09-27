@@ -43,9 +43,6 @@ Blog_Config_Path = CWD.joinpath(Blog_Config_Filename)
 Filename_Forbid_Pattern = re.compile(r"[^._0-9a-zA-Z\-]")
 """文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线)。"""
 
-Filename_Is_Year = re.compile(r"^[0-9]{1,4}")
-"""文件名不能像一个年份"""
-
 Markdown_Title_Pattern = re.compile(r"^(#{1,6}|>|1.|-|\*) (.+)")
 
 Title_Index_Length = 1
@@ -102,14 +99,16 @@ class ArticleConfig:
     ctime   : str   # 文章创建时间
     mtime   : str   # 文章修改时间
     checksum: str   # sha1, 用来判断文章内容有无变更
-    photo_n : str   # 正在使用第几张图片 [不可手动修改]
-    photos  : list  # 图片地址 (array of tables)
+    photo_n : int   # 正在使用第几张图片 [不可手动修改]
+    photos  : list  # 图片地址
 
-    '''其中，图片地址用 JSON 描述是：
+    '''其中，图片地址用 JSON 描述如下：
     "photos": [
-        [ "./articles/pics/abc.jpg", "https://example.com/abc.jpg" ],
-        [ "./articles/pics/def.jpg", "https://example.com/def.jpg" ],
+        [ "Photo1", "./articles/pics/abc.jpg", "https://example.com/abc.jpg" ],
+        [ "Photo2", "./articles/pics/def.jpg", "https://example.com/def.jpg" ],
     ]
+    
+    photos 中的每一个 photo, photo[0] 是图片名称, photo[1] 是第一张图，以此类推。
     '''
 
     @classmethod
@@ -128,7 +127,9 @@ class ArticleConfig:
             author   = "",
             ctime    = ctime,
             mtime    = ctime,
-            checksum = checksum
+            checksum = checksum,
+            photo_n  = 1,
+            photos   = [],
         )
 
     @classmethod

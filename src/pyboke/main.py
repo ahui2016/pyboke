@@ -10,8 +10,8 @@ from . import (
     tmpl_render,
 )
 from .model import BlogConfig, Articles_Folder_Path, Drafts_Folder_Path, Draft_TMPL_Path, ArticleConfig
-from .tmpl_render import render_article, render_all_title_indexes, render_all_years, render_rss, render_index_html, \
-    render_all_articles, art_cfg_path_from_md_path, delete_article
+from .tmpl_render import render_article, render_all_title_indexes, render_rss, render_index_html, \
+    render_all_articles, art_cfg_path_from_md_path, delete_article, render_years_html
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -124,21 +124,21 @@ def post(ctx, filename):
     "--title-index",
     is_flag=True,
     default=False,
-    help="渲染全部标题索引"
+    help="渲染标题索引"
 )
 @click.option(
     "years",
     "-years",
     is_flag=True,
     default=False,
-    help="渲染全部年份列表"
+    help="渲染年份列表"
 )
 @click.option(
     "rss",
     "-rss",
     is_flag=True,
     default=False,
-    help="只渲染 RSS (atom.xml)"
+    help="渲染 RSS (atom.xml)"
 )
 @click.option(
     "render_all",
@@ -152,7 +152,7 @@ def post(ctx, filename):
     "-force",
     is_flag=True,
     default=False,
-    help="强制渲染HTML"
+    help="强制渲染"
 )
 @click.pass_context
 def render(ctx, filename, indexes, years, rss, render_all, force):
@@ -180,9 +180,8 @@ def render(ctx, filename, indexes, years, rss, render_all, force):
 
     if years:
         all_articles = tmpl_render.get_all_articles()
-        arts_in_years = render_all_years(all_articles, cfg)
-        recent_arts = tmpl_render.get_recent_articles(all_articles, cfg.home_recent_max)
-        render_index_html(recent_arts, cfg, arts_in_years)
+        arts_in_years = tmpl_render.get_articles_in_years(all_articles)
+        render_years_html(arts_in_years, cfg)
 
     if render_all:
         if err := render_all_articles(cfg, force):

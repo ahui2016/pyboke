@@ -18,14 +18,13 @@ checksum = '{{art.checksum}}'
 # 正在使用第几张图片 [不可手动修改]
 photo_n = {{art.photo_n}}
 
-# 图片地址 (array of tables)
+# 图片地址
 photos = [
 {% for photos in art.photos %}
     [
-    {% for photo in photos %}
-    '''{photo}''',
+    {% for item in photos %}
+    '''{item}''',
     {% endfor %}
     ],
-]
 {% endfor %}
-photos  : list
+]

@@ -6,10 +6,14 @@
 
 {% block main %}
 <div class="text-right"><a href="index.html">&lt;&lt; Home</a></div>
-<h2>Articles in year {{ year }}</h2>
+
+{% for year in year_articles %}
+<h3>{{ year }}</h3>
 <ul>
-  {% for art in articles %}
-  <li>{{ art.ctime[:10] }} <a href="{{art.id}}.html">{{art.title}}</a></li>
+  {% for art in year_articles[year] %}
+  <li>{{ art.ctime[5:10] }} <a href="{{art.id}}.html">{{art.title}}</a></li>
   {% endfor %}
 </ul>
+{% endfor %}
+
 {% endblock %}

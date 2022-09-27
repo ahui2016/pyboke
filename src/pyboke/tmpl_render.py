@@ -26,7 +26,7 @@ tmplfile = dict(
     draft=Draft_TMPL_Name,
     base="base.html",
     index="index.html",
-    year="year.html",
+    years="years.html",
     title_index="title-index.html",
     indexes="indexes.html",
     article="article.html",
@@ -109,22 +109,6 @@ def get_articles_in_years(sorted_articles):
     return arts
 
 
-'''
-def get_articles_in_year(sorted_articles, year):
-    """获取指定年份的全部文章"""
-    return [art for art in sorted_articles if art["ctime"][:4] == year]
-'''
-
-
-def get_year_count(arts_in_years):
-    return [(year, len(arts_in_years[year])) for year in arts_in_years]
-
-
-def articles_in_year(sorted_articles, year):
-    """指定年份的文章列表"""
-    return [art for art in sorted_articles if art["ctime"][:4] == year]
-
-
 def get_title_indexes(sorted_articles):
     """
     :return: dict(index, articles)
@@ -143,12 +127,11 @@ def get_title_indexes(sorted_articles):
     return indexes
 
 
-def render_index_html(recent_articles, blog_cfg, arts_in_years):
+def render_index_html(recent_articles, blog_cfg):
     tmpl = jinja_env.get_template(tmplfile["index"])
     html = tmpl.render(dict(
         blog=blog_cfg,
         articles=recent_articles,
-        year_count=get_year_count(arts_in_years),
         parent_dir=""
     ))
     output_path = Output_Folder_Path.joinpath(tmplfile["index"])
@@ -156,39 +139,16 @@ def render_index_html(recent_articles, blog_cfg, arts_in_years):
     output_path.write_text(html, encoding="utf-8")
 
 
-def render_or_delete_year_html(arts_in_years, blog_cfg, year):
-    if year in arts_in_years:
-        render_year_html(arts_in_years[year], blog_cfg, year)
-        return
-
-    output_path = Output_Folder_Path.joinpath(f"{year}{HTML_Suffix}")
-    if output_path.exists():
-        print(f"DELETE {output_path}")
-        output_path.unlink()
-
-
-def render_year_html(articles, blog_cfg, year):
-    tmpl = jinja_env.get_template(tmplfile["year"])
+def render_years_html(year_articles, blog_cfg):
+    tmpl = jinja_env.get_template(tmplfile["years"])
     html = tmpl.render(dict(
-        articles=articles,
+        year_articles=year_articles,
         blog=blog_cfg,
-        year=year,
         parent_dir=""
     ))
-    output_path = Output_Folder_Path.joinpath(f"{year}{HTML_Suffix}")
+    output_path = Output_Folder_Path.joinpath(tmplfile["years"])
     print(f"render and write {output_path}")
     output_path.write_text(html, encoding="utf-8")
-
-
-def render_all_years(articles, blog_cfg):
-    """注意：通常还需要渲染首页。
-
-    :return: 返回 arts_in_years 方便在外面渲染首页。
-    """
-    arts_in_years = get_articles_in_years(articles)
-    for year in arts_in_years:
-        render_year_html(arts_in_years[year], blog_cfg, year)
-    return arts_in_years
 
 
 def sort_dict_by_key(d: dict) -> list:
@@ -311,10 +271,11 @@ def render_all_articles(blog_cfg: BlogConfig, force: bool):
         return False
 
     all_arts = get_all_articles()
+    arts_in_years = get_articles_in_years(all_arts)
+    render_years_html(arts_in_years, blog_cfg)
     render_all_title_indexes(all_arts, blog_cfg)
     recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
-    arts_in_years = render_all_years(all_arts, blog_cfg)
-    render_index_html(recent_arts, blog_cfg, arts_in_years)
+    render_index_html(recent_arts, blog_cfg)
     rss_arts = get_rss_articles(all_arts)
     really_render_rss(rss_arts, blog_cfg)
     return False
@@ -323,11 +284,10 @@ def render_all_articles(blog_cfg: BlogConfig, force: bool):
 def update_on_article_changed(art_cfg, blog_cfg):
     all_arts = get_all_articles()
     recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
+    render_index_html(recent_arts, blog_cfg)
     arts_in_years = get_articles_in_years(all_arts)
-    render_index_html(recent_arts, blog_cfg, arts_in_years)
-    year = art_cfg.ctime[:4]
-    render_or_delete_year_html(arts_in_years, blog_cfg, year)
-    render_one_title_index(art_cfg, all_arts, blog_cfg)
+    render_years_html(arts_in_years, blog_cfg)  # 可以优化
+    render_one_title_index(art_cfg, all_arts, blog_cfg)  # 可以优化
     rss_arts = get_rss_articles(all_arts)
     really_render_rss(rss_arts, blog_cfg)
 

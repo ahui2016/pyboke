@@ -22,9 +22,9 @@ photo_n = {{art.photo_n}}
 photos = [
 {% for photos in art.photos %}
     [
-    {% for item in photos %}
-    '''{item}''',
-    {% endfor %}
+    {% for item in photos -%}
+    '''{{item}}''',
+    {% endfor -%}
     ],
 {% endfor %}
 ]

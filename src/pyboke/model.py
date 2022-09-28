@@ -28,9 +28,9 @@ Default_Theme_Name = "simple"
 CWD = Path.cwd().resolve()
 Drafts_Folder_Path = CWD.joinpath(Drafts_Folder_Name)
 Articles_Folder_Path = CWD.joinpath(Articles_Folder_Name)
-Pics_Folder_Path = Articles_Folder_Path.joinpath(Pics_Folder_Name)
 Metadata_Folder_Path = Articles_Folder_Path.joinpath(Metadata_Folder_Name)
 Output_Folder_Path = CWD.joinpath(Output_Folder_Name)
+Pics_Folder_Path = Output_Folder_Path.joinpath(Pics_Folder_Name)
 RSS_Path = Output_Folder_Path.joinpath(RSS_Atom_XML)
 Theme_CSS_Path = Output_Folder_Path.joinpath(Theme_CSS_Name)
 Templates_Folder_Path = CWD.joinpath(Templates_Folder_Name)
@@ -42,6 +42,7 @@ Filename_Forbid_Pattern = re.compile(r"[^._0-9a-zA-Z\-]")
 """文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线)。"""
 
 Markdown_Title_Pattern = re.compile(r"^(#{1,6}|>|1.|-|\*) (.+)")
+Markdown_Image_Pattern = re.compile(r"!\[(.*)]\((.+)\)")
 
 Title_Index_Length = 1
 """标题索引字数（以后有可能改成允许用户自定义）"""
@@ -59,28 +60,30 @@ def now():
 
 @dataclass
 class BlogConfig:
-    name: str  # 博客名称
-    author: str  # 默认作者（每篇文章也可独立设定作者）
-    uuid: str  # 用于 RSS feed 的 uuid
-    website: str  # 博客网址，用于 RSS feed
-    rss_link: str  # RSS feed 的网址，根据 website 生成
-    home_recent_max: int  # 首页 "最近更新" 列表中的项目上限
-    title_length_max: int  # 文章标题长度上限，单位: byte
-    rss_updated: str  # 上次生成 RSS feed 的时间
-    blog_updated: str  # 博客更新日期，如果大于 rss_updated 就要重新生成 RSS
+    name             : str  # 博客名称
+    author           : str  # 默认作者（每篇文章也可独立设定作者）
+    uuid             : str  # 用于 RSS feed 的 uuid
+    website          : str  # 博客网址，用于 RSS feed
+    rss_link         : str  # RSS feed 的网址，根据 website 生成
+    home_recent_max  : int  # 首页 "最近更新" 列表中的项目上限
+    title_length_max : int  # 文章标题长度上限，单位: byte
+    rss_updated      : str  # 上次生成 RSS feed 的时间
+    blog_updated     : str  # 博客更新日期，如果大于 rss_updated 就要重新生成 RSS
+    photo_n          : int  # 指定使用第几张图片
 
     @classmethod
     def default(cls):
         return BlogConfig(
-            name="在此填写博客名称",
-            author="在此填写作者名称",
-            uuid="",  # 在第一次填写博客名称时生成
-            website="在此填写博客网址",
-            rss_link="",  # 在博客名称变更时生成
-            home_recent_max=20,
-            title_length_max=192,
-            rss_updated="",
-            blog_updated=now(),
+            name             = "在此填写博客名称",
+            author           = "在此填写作者名称",
+            uuid             = "",  # 在第一次填写博客名称时生成
+            website          = "在此填写博客网址",
+            rss_link         = "",  # 在博客名称变更时生成
+            home_recent_max  = 20,
+            title_length_max = 192,
+            rss_updated      = "",
+            blog_updated     = now(),
+            photo_n          = 1,
         )
 
     @classmethod
@@ -110,24 +113,23 @@ class ArticleConfig:
     '''
 
     @classmethod
-    def from_md_file(cls, md_file_data, title_length):
+    def from_md_file(cls, md_file_data: bytes, title_length: int):
         """
         md_file_data 是文件的二进制数据。
         """
-
-        first_line = get_first_line(md_file_data)
-        title      = get_md_title(first_line, title_length)
+        md_str     = md_file_data.decode()
+        first_line = get_first_line(md_str)
         checksum   = hashlib.sha1(md_file_data).hexdigest()
         ctime      = now()
 
         return ArticleConfig(
-            title    = title,
+            title    = get_md_title(first_line, title_length),
             author   = "",
             ctime    = ctime,
             mtime    = ctime,
             checksum = checksum,
             photo_n  = 1,
-            photos   = [],
+            photos   = get_md_images(md_str),
         )
 
     @classmethod
@@ -161,11 +163,10 @@ def tomli_loads(file) -> dict:
 
 def get_first_line(file):
     """
-    :param file: bytes
+    :param file: str
     :return: str, 注意有可能返回空字符串。
     """
-    lines = file.decode()
-    for line in lines.splitlines():
+    for line in file.splitlines():
         line = line.strip()
         if line:
             return line
@@ -219,3 +220,8 @@ def get_md_title(md_first_line: str, max_bytes: int) -> str:
         title = md_title[0][1].strip()
 
     return utf8_byte_truncate(title, max_bytes).strip()
+
+
+def get_md_images(md_str):
+    images = Markdown_Image_Pattern.findall(md_str)
+    return [list(image) for image in images]

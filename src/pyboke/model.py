@@ -42,7 +42,6 @@ Filename_Forbid_Pattern = re.compile(r"[^._0-9a-zA-Z\-]")
 """文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线)。"""
 
 Markdown_Title_Pattern = re.compile(r"^(#{1,6}|>|1.|-|\*) (.+)")
-Markdown_Image_Pattern = re.compile(r"!\[(.*)]\((.+)\)")
 
 Title_Index_Length = 1
 """标题索引字数（以后有可能改成允许用户自定义）"""
@@ -69,7 +68,6 @@ class BlogConfig:
     title_length_max : int  # 文章标题长度上限，单位: byte
     rss_updated      : str  # 上次生成 RSS feed 的时间
     blog_updated     : str  # 博客更新日期，如果大于 rss_updated 就要重新生成 RSS
-    photo_n          : int  # 指定使用第几张图片
 
     @classmethod
     def default(cls):
@@ -83,7 +81,6 @@ class BlogConfig:
             title_length_max = 192,
             rss_updated      = "",
             blog_updated     = now(),
-            photo_n          = 1,
         )
 
     @classmethod
@@ -100,37 +97,38 @@ class ArticleConfig:
     ctime   : str   # 文章创建时间
     mtime   : str   # 文章修改时间
     checksum: str   # sha1, 用来判断文章内容有无变更
-    photo_n : int   # 正在使用第几张图片 [不可手动修改]
-    photos  : list  # 图片地址
+    pairs   : list  # 自动替换（主要用于替换图片地址）
 
-    '''其中，图片地址用 JSON 描述如下：
-    "photos": [
-        [ "Photo1", "./articles/pics/abc.jpg", "https://example.com/abc.jpg" ],
-        [ "Photo2", "./articles/pics/def.jpg", "https://example.com/def.jpg" ],
+    """其中, pairs 用 TOML 描述如下：
+    pairs =  [
+        [ '''../output/pics/abc.jpg''', '''https://example.com/abc.jpg''' ],
+        [ '''../output/pics/def.jpg''', '''https://example.com/def.jpg''' ],
     ]
     
-    photos 中的每一个 photo, photo[0] 是图片名称, photo[1] 是第一张图，以此类推。
-    '''
+    意思是，渲染时用每一对的第二个字符串来代替第一个字符串。
+    （只是渲染后的 HTML 的内容被替换, markdown 文件的内容保持不变）
+    """
 
     @classmethod
-    def from_md_file(cls, md_file_data: bytes, title_length: int):
-        """
-        md_file_data 是文件的二进制数据。
-        """
-        md_str     = md_file_data.decode()
-        first_line = get_first_line(md_str)
-        checksum   = hashlib.sha1(md_file_data).hexdigest()
-        ctime      = now()
+    def from_md_file(cls, file_path: Path, file_data: bytes, title_length: int):
+        md_str      = file_data.decode()
+        first_line  = get_first_line(md_str)
+        checksum    = hashlib.sha1(file_data).hexdigest()
+        ctime       = now()
 
-        return ArticleConfig(
-            title    = get_md_title(first_line, title_length),
+        title = get_md_title(first_line, title_length)
+        if not title:
+            return None, f"无法获取文章标题，请修改文章的标题(文件的第一行内容): {file_path}"
+
+        art_cfg = ArticleConfig(
+            title    = title,
             author   = "",
             ctime    = ctime,
             mtime    = ctime,
             checksum = checksum,
-            photo_n  = 1,
-            photos   = get_md_images(md_str),
+            pairs    = [],
         )
+        return art_cfg, None
 
     @classmethod
     def loads(cls, file):
@@ -220,8 +218,3 @@ def get_md_title(md_first_line: str, max_bytes: int) -> str:
         title = md_title[0][1].strip()
 
     return utf8_byte_truncate(title, max_bytes).strip()
-
-
-def get_md_images(md_str):
-    images = Markdown_Image_Pattern.findall(md_str)
-    return [list(image) for image in images]

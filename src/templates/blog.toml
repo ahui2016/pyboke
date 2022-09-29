@@ -30,5 +30,3 @@ rss_updated = '{{cfg.rss_updated}}'
 # [一般不手动修改] 博客更新日期，如果大于 rss_updated 就要重新生成 RSS
 blog_updated = '{{cfg.blog_updated}}'
 
-# 指定使用第几张图片
-photo_n = {{cfg.photo_n}}

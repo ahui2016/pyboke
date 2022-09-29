@@ -88,7 +88,6 @@ def get_all_articles():
         art = ArticleConfig.loads(art_path)
         art = asdict(art)
         art["id"] = art_path.stem
-        del art["photos"]
         arts.append(art)
     return sorted(arts, key=itemgetter("ctime"), reverse=True)
 
@@ -183,6 +182,8 @@ def render_article_html(
         art_cfg : ArticleConfig,
 ):
     art = asdict(art_cfg)
+    for pair in art_cfg.pairs:
+        md_text = md_text.replace(pair[0], pair[1], 1)
     art["content"] = mistune.html(md_text)
     tmpl = jinja_env.get_template(tmplfile["article"])
     html = tmpl.render(dict(blog=blog_cfg, art=art, parent_dir=""))
@@ -280,9 +281,10 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     :return: 发生错误时返回 (str, None), 否则反回 (None, ArticleConfig) 或 (None, None).
     """
     md_file_data = md_file.read_bytes()
-    art_cfg_new = ArticleConfig.from_md_file(md_file_data, blog_cfg.title_length_max)
-    if not art_cfg_new.title:
-        return "无法获取文章标题，请修改文章的标题(文件的第一行内容)", None
+    art_cfg_new, err = ArticleConfig.from_md_file(
+        md_file, md_file_data, blog_cfg.title_length_max)
+    if err:
+        return err, None
 
     art_toml_path = art_cfg_path_from_md_path(md_file)
     need_to_render = False
@@ -301,10 +303,6 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
             art_cfg.title = art_cfg_new.title
             art_cfg.checksum = art_cfg_new.checksum
             art_cfg.mtime = model.now()
-            photo_n = get_photo_n(art_cfg, blog_cfg.photo_n)
-            art_cfg.photos, err = get_md_images(art_cfg, art_cfg_new, photo_n, art_toml_path)
-            if err:
-                return err, None
             need_to_render = True
 
     # 需要渲染 toml
@@ -321,57 +319,6 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
         return None, art_cfg
 
     return None, None
-
-
-def get_photo_n(art_cfg, blog_photo_n):
-    """如果 blog_photo_n 超过 len(photo_urls), 则自动改为指定最后一张图片"""
-    if len(art_cfg.photos) == 0:
-        return 1
-
-    photo = art_cfg.photos[0]  # photo = [name, url1, url2...]
-    photo_urls = photo[1:]
-    urls_len = len(photo_urls)
-    return urls_len if blog_photo_n > urls_len else blog_photo_n
-
-
-def md_images_to_dict(images):
-    d = {}
-    for image in images:
-        d[image[0]] = image[1:]
-    return d
-
-
-def get_md_images(art_cfg_old, art_cfg_new, photo_n, art_cfg_path):
-    """图片地址用 JSON 描述如下：
-    "photos": [
-        [ "Photo1", "./articles/pics/abc.jpg", "https://example.com/abc.jpg" ],
-        [ "Photo2", "./articles/pics/def.jpg", "https://example.com/def.jpg" ],
-    ]
-    photos 中的每一个 photo, photo[0] 是图片名称, photo[1] 是第一张图，以此类推。
-    """
-
-    # 如果图片只有一个地址，则以 art_cfg_new 为准。
-    if len(art_cfg_old.photos) == 0 or len(art_cfg_old.photos[0]) == 2:
-        return art_cfg_new.photos, None
-
-    images_old = md_images_to_dict(art_cfg_old.photos)
-    images = []
-
-    for item in art_cfg_new.photos:
-        name, img_url = item[0].strip(), item[1]
-        if not name:
-            return None
-        if name in images_old:
-            image = images_old.pop(name)
-            image[photo_n] = img_url
-            images.append(image)
-        else:
-            images.append(item)
-
-    if len(images_old) > 0:
-        return None, f"图片设置需要手动处理: {art_cfg_path}"
-
-    return images, None
 
 
 def art_cfg_path_from_md_path(md_path):

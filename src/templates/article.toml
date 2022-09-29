@@ -15,6 +15,9 @@ mtime = '{{art.mtime}}'
 # sha1, 用来判断文章内容有无变更 [请勿手动修改]
 checksum = '{{art.checksum}}'
 
+# 是否执行自动替换 (0:跟随总设定, -1:不执行, 1:执行)
+replace = {{art.replace}}
+
 # 自动替换。例:
 # pairs =  [
 #   [ '''../output/pics/abc.jpg''', '''https://example.com/abc.jpg''' ],

@@ -175,15 +175,27 @@ def render_years_html(year_articles, blog_cfg):
     output_path.write_text(html, encoding="utf-8")
 
 
+def replace_or_not(art_cfg : ArticleConfig, blog_cfg: BlogConfig):
+    match art_cfg.replace:
+        case 0:
+            return blog_cfg.auto_replace
+        case -1:
+            return False
+        case 1:
+            return True
+
+
 def render_article_html(
         md_file : Path,
         md_text : str,
         blog_cfg: BlogConfig,
         art_cfg : ArticleConfig,
 ):
+    if replace_or_not(art_cfg, blog_cfg):
+        for pair in art_cfg.pairs:
+            md_text = md_text.replace(pair[0], pair[1], 1)
+
     art = asdict(art_cfg)
-    for pair in art_cfg.pairs:
-        md_text = md_text.replace(pair[0], pair[1], 1)
     art["content"] = mistune.html(md_text)
     tmpl = jinja_env.get_template(tmplfile["article"])
     html = tmpl.render(dict(blog=blog_cfg, art=art, parent_dir=""))

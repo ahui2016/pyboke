@@ -59,15 +59,16 @@ def now():
 
 @dataclass
 class BlogConfig:
-    name             : str  # 博客名称
-    author           : str  # 默认作者（每篇文章也可独立设定作者）
-    uuid             : str  # 用于 RSS feed 的 uuid
-    website          : str  # 博客网址，用于 RSS feed
-    rss_link         : str  # RSS feed 的网址，根据 website 生成
-    home_recent_max  : int  # 首页 "最近更新" 列表中的项目上限
-    title_length_max : int  # 文章标题长度上限，单位: byte
-    rss_updated      : str  # 上次生成 RSS feed 的时间
-    blog_updated     : str  # 博客更新日期，如果大于 rss_updated 就要重新生成 RSS
+    name             : str   # 博客名称
+    author           : str   # 默认作者（每篇文章也可独立设定作者）
+    uuid             : str   # 用于 RSS feed 的 uuid
+    website          : str   # 博客网址，用于 RSS feed
+    rss_link         : str   # RSS feed 的网址，根据 website 生成
+    home_recent_max  : int   # 首页 "最近更新" 列表中的项目上限
+    title_length_max : int   # 文章标题长度上限，单位: byte
+    rss_updated      : str   # 上次生成 RSS feed 的时间
+    blog_updated     : str   # 博客更新日期，如果大于 rss_updated 就要重新生成 RSS
+    auto_replace     : bool  # 是否执行自动替换
 
     @classmethod
     def default(cls):
@@ -81,6 +82,7 @@ class BlogConfig:
             title_length_max = 192,
             rss_updated      = "",
             blog_updated     = now(),
+            auto_replace     = True,
         )
 
     @classmethod
@@ -92,12 +94,13 @@ class BlogConfig:
 
 @dataclass
 class ArticleConfig:
-    title   : str   # 文章标题 [不需要手动填写，会自动获取]
-    author  : str   # 文章作者 [通常留空，自动等同于博客作者]
-    ctime   : str   # 文章创建时间
-    mtime   : str   # 文章修改时间
-    checksum: str   # sha1, 用来判断文章内容有无变更
-    pairs   : list  # 自动替换（主要用于替换图片地址）
+    title    : str   # 文章标题 [不需要手动填写，会自动获取]
+    author   : str   # 文章作者 [通常留空，自动等同于博客作者]
+    ctime    : str   # 文章创建时间
+    mtime    : str   # 文章修改时间
+    checksum : str   # sha1, 用来判断文章内容有无变更
+    replace  : int   # 是否执行自动替换 (0:跟随总设定, -1:不执行, 1:执行)
+    pairs    : list  # 自动替换（主要用于替换图片地址）
 
     """其中, pairs 用 TOML 描述如下：
     pairs =  [
@@ -126,6 +129,7 @@ class ArticleConfig:
             ctime    = ctime,
             mtime    = ctime,
             checksum = checksum,
+            replace  = 0,
             pairs    = [],
         )
         return art_cfg, None

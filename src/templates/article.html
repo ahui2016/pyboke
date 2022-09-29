@@ -4,6 +4,19 @@
   <title>{{ art.title }} - {{ blog.name }}</title>
 {% endblock %}
 
+{% block style %}
+  <style>
+  img {
+    {% if art.img_width|length %}
+    max-width: {{ art.img_width }} !important;
+    {% else %}
+    max-width: {{ blog.img_max_width }} !important;
+    {% endif %}
+    height: auto !important;
+  }
+  </style>
+{% endblock %}
+
 {% block header %}
 {% endblock %}
 

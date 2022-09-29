@@ -69,6 +69,7 @@ class BlogConfig:
     rss_updated      : str   # 上次生成 RSS feed 的时间
     blog_updated     : str   # 博客更新日期，如果大于 rss_updated 就要重新生成 RSS
     auto_replace     : bool  # 是否执行自动替换
+    img_max_width    : str   # HTML中的图片的最大宽度
 
     @classmethod
     def default(cls):
@@ -83,6 +84,7 @@ class BlogConfig:
             rss_updated      = "",
             blog_updated     = now(),
             auto_replace     = True,
+            img_max_width    = "100%",
         )
 
     @classmethod
@@ -94,13 +96,14 @@ class BlogConfig:
 
 @dataclass
 class ArticleConfig:
-    title    : str   # 文章标题 [不需要手动填写，会自动获取]
-    author   : str   # 文章作者 [通常留空，自动等同于博客作者]
-    ctime    : str   # 文章创建时间
-    mtime    : str   # 文章修改时间
-    checksum : str   # sha1, 用来判断文章内容有无变更
-    replace  : int   # 是否执行自动替换 (0:跟随总设定, -1:不执行, 1:执行)
-    pairs    : list  # 自动替换（主要用于替换图片地址）
+    title     : str   # 文章标题 [不需要手动填写，会自动获取]
+    author    : str   # 文章作者 [通常留空，自动等同于博客作者]
+    ctime     : str   # 文章创建时间
+    mtime     : str   # 文章修改时间
+    checksum  : str   # sha1, 用来判断文章内容有无变更
+    img_width : str   # HTML中的图片的最大宽度 (留空表示跟随总设定)
+    replace   : int   # 是否执行自动替换 (0:跟随总设定, -1:不执行, 1:执行)
+    pairs     : list  # 自动替换（主要用于替换图片地址）
 
     """其中, pairs 用 TOML 描述如下：
     pairs =  [
@@ -129,6 +132,7 @@ class ArticleConfig:
             ctime    = ctime,
             mtime    = ctime,
             checksum = checksum,
+            img_width = "",
             replace  = 0,
             pairs    = [],
         )

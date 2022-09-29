@@ -33,3 +33,6 @@ blog_updated = '{{cfg.blog_updated}}'
 # 是否执行自动替换 (true/false)
 auto_replace = {{cfg.auto_replace|string|lower}}
 
+# HTML中的图片的最大宽度
+img_max_width = '{{cfg.img_max_width}}'
+

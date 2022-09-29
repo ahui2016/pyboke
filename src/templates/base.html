@@ -12,6 +12,16 @@
     {% block title %}
     <title>{{ blog.name }}</title>
     {% endblock %}
+
+    {% block style %}
+    <style>
+    img {
+      max-width: {{ blog.img_max_width }} !important;
+      height: auto !important;
+    }
+    </style>
+    {% endblock %}
+
   </head>
   <body>
     {% block header %}{% endblock %}

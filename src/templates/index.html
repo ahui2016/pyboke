@@ -17,6 +17,7 @@
 <div id="archives">
   <a href="title-index.html">TitleIndex</a>
   <a href="years.html">Years</a>
+  <a href="#" id="random-btn">Random</a>
 </div>
 {% endblock %}
 
@@ -28,4 +29,17 @@
     | RSS <a href="atom.xml">atom.xml</a>
   </p>
 </div>
+{% endblock %}
+
+{% block script %}
+<script>
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min) + min);
+}
+function randomGo() {
+  const i = getRandomInt(0, {{ files|length }});
+  location.href = {{ files[i] }};
+}
+querySelector('#random-btn').addEventListener("click", randomGo, false);
+</script>
 {% endblock %}

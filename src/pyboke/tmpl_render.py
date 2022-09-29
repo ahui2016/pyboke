@@ -92,6 +92,10 @@ def get_all_articles():
     return sorted(arts, key=itemgetter("ctime"), reverse=True)
 
 
+def get_all_html_filenames(all_articles):
+    return [art["id"]+HTML_Suffix for art in all_articles]
+
+
 def get_recent_articles(sorted_articles, n):
     return sorted_articles[:n]
 
@@ -151,11 +155,12 @@ def render_title_index(all_articles, blog_cfg):
     output_path.write_text(html, encoding="utf-8")
 
 
-def render_index_html(recent_articles, blog_cfg):
+def render_index_html(recent_articles, html_filenames, blog_cfg):
     tmpl = jinja_env.get_template(tmplfile["index"])
     html = tmpl.render(dict(
         blog=blog_cfg,
         articles=recent_articles,
+        files=html_filenames,
         parent_dir=""
     ))
     output_path = Output_Folder_Path.joinpath(tmplfile["index"])
@@ -251,7 +256,8 @@ def render_all_articles(blog_cfg: BlogConfig, force: bool):
 def update_index_rss(blog_cfg):
     all_arts = get_all_articles()
     recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
-    render_index_html(recent_arts, blog_cfg)
+    html_filenames = get_all_html_filenames(all_arts)
+    render_index_html(recent_arts, html_filenames, blog_cfg)
     arts_in_years = get_articles_in_years(all_arts)
     render_years_html(arts_in_years, blog_cfg)
     render_title_index(all_arts, blog_cfg)

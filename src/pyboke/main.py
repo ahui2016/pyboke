@@ -142,6 +142,12 @@ def post(ctx, filename):
     help="渲染 RSS (atom.xml)"
 )
 @click.option(
+    "theme",
+    "-theme",
+    default="",
+    help="更改博客的主题(CSS)"
+)
+@click.option(
     "render_all",
     "-all",
     is_flag=True,
@@ -156,7 +162,7 @@ def post(ctx, filename):
     help="强制渲染"
 )
 @click.pass_context
-def render(ctx, filename, indexes, years, rss, render_all, force):
+def render(ctx, filename, indexes, years, rss, theme, render_all, force):
     """Render TOML and HTML. (渲染文章的 toml 和 html)
 
     Examples:
@@ -175,6 +181,14 @@ def render(ctx, filename, indexes, years, rss, render_all, force):
 
     cfg = check_initialization(ctx)
 
+    if theme:
+        themes = util.get_themes()
+        if theme not in themes:
+            print(f"找不到主题: {theme}")
+            print(f"可选主题: {themes}")
+            ctx.exit()
+        util.change_theme(theme, cfg)
+
     if indexes:
         all_articles = tmpl_render.get_all_articles()
         render_title_index(all_articles, cfg)
@@ -188,7 +202,7 @@ def render(ctx, filename, indexes, years, rss, render_all, force):
         if err := render_all_articles(cfg, force):
             print(f"Error: {err}")
 
-    if indexes or years or render_all:
+    if indexes or years or render_all or theme:
         ctx.exit()
 
     if len(filename) != 1:

@@ -2,6 +2,18 @@ header {
   text-align: center;
 }
 
+h1 {
+  margin-bottom: 2rem;
+}
+
+h2 {
+  margin-bottom: 1.5rem;
+}
+
+h3 {
+  margin-bottom: 1rem;
+}
+
 a {
   text-decoration: none;
 }
@@ -14,6 +26,11 @@ a {
 }
 .text-right {
   text-align: right;
+}
+
+#back-home {
+  text-align: right;
+  margin-bottom: 2rem;
 }
 
 #archives {
@@ -53,7 +70,7 @@ a {
 }
 
 #title-index-list {
-  margin-top: 5rem;
+  margin-bottom: 3rem;
   font-size: xx-large;
   display: flex;
   flex-wrap: wrap;

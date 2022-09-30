@@ -131,3 +131,16 @@ def check_filename(file: Path, parent_dir):
     if not file.parent.samefile(parent_dir):
         return f"不在 {parent_dir.name} 文件夹内: {file}"
     return False
+
+
+def get_themes():
+    themes = Themes_Folder_Path.glob("*.css")
+    return [theme.stem for theme in themes]
+
+
+def change_theme(name, blog_cfg):
+    theme_file = Themes_Folder_Path.joinpath(f"{name}.css")
+    shutil.copyfile(theme_file, Theme_CSS_Path)
+    blog_cfg.current_theme = name
+    render_blog_config(blog_cfg)
+    print("OK.")

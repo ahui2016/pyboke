@@ -12,6 +12,12 @@ home_recent_max = {{cfg.home_recent_max}}
 # 文章标题长度上限，单位: byte
 title_length_max = {{cfg.title_length_max}}
 
+# 是否执行自动替换 (true/false)
+auto_replace = {{cfg.auto_replace|string|lower}}
+
+# HTML中的图片的最大宽度
+img_max_width = '{{cfg.img_max_width}}'
+
 # [可暂时不填，但正式发布博客到网上时必填] 博客网址，用于 RSS feed
 website = '''{{cfg.website}}'''
 
@@ -21,6 +27,9 @@ website = '''{{cfg.website}}'''
 # RSS feed 的网址 [一般根据 website 自动生成]
 rss_link = '''{{cfg.rss_link}}'''
 
+# [手动修改无效] 当前主题 (CSS)
+current_theme = '{{cfg.current_theme}}'
+
 # [一般不手动修改] 用于 RSS feed 的 uuid
 uuid = '{{cfg.uuid}}'
 
@@ -29,10 +38,4 @@ rss_updated = '{{cfg.rss_updated}}'
 
 # [一般不手动修改] 博客更新日期，如果大于 rss_updated 就要重新生成 RSS
 blog_updated = '{{cfg.blog_updated}}'
-
-# 是否执行自动替换 (true/false)
-auto_replace = {{cfg.auto_replace|string|lower}}
-
-# HTML中的图片的最大宽度
-img_max_width = '{{cfg.img_max_width}}'
 

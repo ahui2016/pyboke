@@ -221,6 +221,26 @@ def render(ctx, filename, indexes, years, rss, theme, render_all, force):
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS)
+@click.argument("filenames", nargs=2, type=click.Path())
+@click.pass_context
+def rename(ctx, filenames):
+    """Rename a file. (更改一篇文章的文件名)
+
+    Example:
+
+    boke rename articles/old-name.md articles/new-name.md
+    """
+    check_initialization(ctx)
+    old_path, new_path = Path(filenames[0]), Path(filenames[1])
+    if not old_path.exists():
+        print(f"文件不存在: {old_path}")
+        ctx.exit()
+    if err := util.rename(old_path, new_path):
+        print(f"Error: {err}")
+        ctx.exit()
+
+
+@cli.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("filename", nargs=1, type=click.Path(exists=True))
 @click.pass_context
 def delete(ctx, filename):

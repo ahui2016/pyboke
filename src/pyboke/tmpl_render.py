@@ -200,8 +200,8 @@ def render_article_html(
             md_text = md_text.replace(pair[0], pair[1], 1)
 
     art = asdict(art_cfg)
-    title_index = art["title"][:Title_Index_Length].encode().hex()
-    art["title_index"] = f"i{title_index}"
+    index_id = art["title"][:Title_Index_Length].encode().hex()
+    art["index_id"] = f"i{index_id}"
     art["content"] = mistune.html(md_text)
     tmpl = jinja_env.get_template(tmplfile["article"])
     html = tmpl.render(dict(blog=blog_cfg, art=art, parent_dir=""))

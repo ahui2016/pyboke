@@ -129,10 +129,23 @@ drafts 文件夹，草稿可以放在这里。（但其实草稿放在硬盘里�
 
 ### 提醒：小心覆盖文件
 
-在终端用 `cp` 命令复制文件到 articles 文件夹时，如有同名文件，会直接覆盖。
+在终端用 `cp` 命令复制文件到 articles 文件夹，或使用 `mv` 命令更改文件名时，
+如有同名文件，会直接覆盖。
 
-因此建议用 `boke post` 命令，可以防止覆盖。  
+因此建议用 `boke post` 命令和 `boke rename` 命令，可以防止覆盖。  
 (注意: 由于涉及文件移动, `boke post` 只能用来发布 drafts 文件夹里的文章。)
+
+例: `boke post drafts/abc.md`
+
+### 更改文件名
+
+如果需要更改 articles 文件夹内的文件名，可手动更改，同时 articles/metadata 内的
+的同名（不同后缀名）的文件也要改名。
+
+建议使用 `boke rename` 命令，可自动更改 articles/metadata 内的对应文件名。
+
+例: `boke rename articles/old-name.md articles/new-name.md`
+或: `boke rename articles/old-name.md new-name.md`
 
 ## Themes (主题)
 

@@ -31,7 +31,10 @@
 
 {% block footer %}
 <div id="footer">
-  <div id="footer-home-link"><a href="index.html">&lt;&lt; Home</a></div>
+  <div id="footer-home-link">
+    <a href="index.html">&lt;&lt; Home</a>
+    <a href="title-index.html#{{art.title_index}}">&lt;&lt; Index</a>
+  </div>
   <p id="footer-body">
     {% if art.author|length %}
     Author: {{ art.author }}

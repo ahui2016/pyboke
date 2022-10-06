@@ -116,17 +116,16 @@ def get_title_indexes(sorted_articles):
     """
     :return: dict(index, articles)
     """
-    i = 0
     indexes = {}
     for art in sorted_articles:
         index = art["title"][:Title_Index_Length]
         if index in indexes:
             indexes[index].articles.append(art)
         else:
-            i += 1
+            index_id = index.encode().hex()
             indexes[index] = TitleIndex(
                 name=index,
-                id=f"i{i}",
+                id=f"i{index_id}",
                 articles=[art]
             )
     return indexes
@@ -191,7 +190,7 @@ def replace_or_not(art_cfg : ArticleConfig, blog_cfg: BlogConfig):
 
 
 def render_article_html(
-        md_file : Path,
+        html_path : Path,
         md_text : str,
         blog_cfg: BlogConfig,
         art_cfg : ArticleConfig,
@@ -201,10 +200,11 @@ def render_article_html(
             md_text = md_text.replace(pair[0], pair[1], 1)
 
     art = asdict(art_cfg)
+    title_index = art["title"][:Title_Index_Length].encode().hex()
+    art["title_index"] = f"i{title_index}"
     art["content"] = mistune.html(md_text)
     tmpl = jinja_env.get_template(tmplfile["article"])
     html = tmpl.render(dict(blog=blog_cfg, art=art, parent_dir=""))
-    html_path = html_path_from_md_path(md_file)
     print(f"render and write {html_path}")
     html_path.write_text(html, encoding="utf-8")
 
@@ -292,6 +292,10 @@ def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     return False
 
 
+def preview_article(md_file: Path, blog_cfg: BlogConfig):
+    """只渲染一个文件，不执行 update_index_rss() """
+
+
 def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     """
     在渲染全部文章时，本函数处理其中一个文件。
@@ -333,7 +337,8 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
 
     # 需要渲染 html
     if need_to_render or force:
-        render_article_html(md_file, md_file_data.decode(), blog_cfg, art_cfg)
+        html_path = html_path_from_md_path(md_file)
+        render_article_html(html_path, md_file_data.decode(), blog_cfg, art_cfg)
         return None, art_cfg
 
     return None, None

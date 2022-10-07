@@ -156,6 +156,8 @@ def change_theme(name, blog_cfg):
 
 
 def rename(old_path, new_path):
+    if not old_path.exists():
+        return f"文件不存在: {old_path}"
     if err := check_filename(old_path, Articles_Folder_Path):
         return err
     if err := check_filename(new_path, Articles_Folder_Path, ensure_not_exist=True):
@@ -171,3 +173,8 @@ def rename(old_path, new_path):
     new_html_path = html_path_from_md_path(new_md_path)
     old_html_path.rename(new_html_path)
     return False
+
+
+def articles_count():
+    files = Metadata_Folder_Path.glob("*.toml")
+    return sum(1 for _ in files)

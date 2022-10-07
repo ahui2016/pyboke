@@ -304,6 +304,7 @@ def preview_article(md_file: Path, blog_cfg: BlogConfig):
         if err:
             return err
 
+    art_cfg.mtime = model.now()
     render_article_html(Temp_HTML_Path, md_data.decode(), blog_cfg, art_cfg)
 
 

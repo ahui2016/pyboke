@@ -16,6 +16,45 @@ from .tmpl_render import render_article, render_rss, render_all_articles, \
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
+def check_initialization(ctx, check_website=False) -> BlogConfig:
+    """
+    :return: 没有错误时返回 BlogConfig, 出错时直接退出程序。
+    """
+    if not util.blog_file_folders_exist():
+        print("请先进入博客根目录，或使用 'boke init' 命令新建博客")
+        ctx.exit()
+    err, cfg = util.ensure_blog_config(check_website)
+    if err:
+        print(err)
+        ctx.exit()
+    return cfg
+
+
+def show_info(ctx, _, value):
+    if not value or ctx.resilient_parsing:
+        return
+    cfg = check_initialization(ctx)
+    website = cfg.website if cfg.rss_link else "(注意：未填写网址)"
+    rss = cfg.rss_link if cfg.rss_link else "(注意：填写网址后才能生成RSS)"
+
+    print()
+    print(f"[boke]    {__file__}")
+    print(f"[version] {__version__}")
+    print(f"[repo]    https://github.com/ahui2016/pyboke")
+    print()
+    print(f"[Blog]    {cfg.name}")
+    print(f"[Author]  {cfg.author}")
+    print(f"[Website] {website}")
+    print(f"[RSS]     {rss}")
+    print(f"[Update]  {cfg.blog_updated}")
+    print()
+    print(f"[Themes]  {', '.join(util.get_themes())}")
+    print(f"[Theme]   {cfg.current_theme}")
+    print(f"[Total]   {util.articles_count()} articles")
+    print()
+    ctx.exit()
+
+
 @click.group(invoke_without_command=True)
 @click.help_option("-h", "--help")
 @click.version_option(
@@ -25,6 +64,14 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     "--version",
     package_name=__package_name__,
     message="pyboke version: %(version)s",
+)
+@click.option(
+    "-i",
+    "-info",
+    is_flag=True,
+    help="Show information about the blog.",
+    expose_value=False,
+    callback=show_info,
 )
 @click.pass_context
 def cli(ctx):
@@ -40,19 +87,6 @@ def cli(ctx):
 # 以上是主命令
 ############
 # 以下是子命令
-
-def check_initialization(ctx, check_website=False) -> BlogConfig:
-    """
-    :return: 没有错误时返回 BlogConfig, 出错时直接退出程序。
-    """
-    if not util.blog_file_folders_exist():
-        print("请先进入博客根目录，或使用 'boke init' 命令新建博客")
-        ctx.exit()
-    err, cfg = util.ensure_blog_config(check_website)
-    if err:
-        print(err)
-        ctx.exit()
-    return cfg
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS, name="init")
@@ -231,9 +265,6 @@ def rename(ctx, filenames):
     """
     cfg = check_initialization(ctx)
     old_path, new_path = Path(filenames[0]), Path(filenames[1])
-    if not old_path.exists():
-        print(f"文件不存在: {old_path}")
-        ctx.exit()
     if err := util.rename(old_path, new_path):
         print(f"Error: {err}")
         ctx.exit()

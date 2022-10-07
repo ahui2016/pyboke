@@ -7,12 +7,11 @@ from . import (
     __version__,
     __package_name__,
     util,
-    tmpl_render,
 )
 from .model import BlogConfig, Articles_Folder_Path, Drafts_Folder_Path, \
     Draft_TMPL_Path, ArticleConfig
 from .tmpl_render import render_article, render_rss, render_all_articles, \
-    art_cfg_path_from_md_path, delete_article, render_years_html, render_title_index
+    art_cfg_path_from_md_path, delete_article, preview_article, update_index_rss
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -121,18 +120,11 @@ def post(ctx, filename):
 @cli.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("filename", nargs=-1, type=click.Path(exists=True))
 @click.option(
-    "indexes",
-    "--title-index",
+    "index",
+    "-index",
     is_flag=True,
     default=False,
-    help="渲染标题索引"
-)
-@click.option(
-    "years",
-    "-years",
-    is_flag=True,
-    default=False,
-    help="渲染年份列表"
+    help="只渲染索引、首页等，不渲染文章"
 )
 @click.option(
     "rss",
@@ -155,6 +147,13 @@ def post(ctx, filename):
     help="渲染全部文章"
 )
 @click.option(
+    "preview",
+    "-preview",
+    is_flag=True,
+    default=False,
+    help="预览"
+)
+@click.option(
     "force",
     "-force",
     is_flag=True,
@@ -162,7 +161,7 @@ def post(ctx, filename):
     help="强制渲染"
 )
 @click.pass_context
-def render(ctx, filename, indexes, years, rss, theme, render_all, force):
+def render(ctx, filename, index, rss, theme, render_all, preview, force):
     """Render TOML and HTML. (渲染文章的 toml 和 html)
 
     Examples:
@@ -176,10 +175,15 @@ def render(ctx, filename, indexes, years, rss, theme, render_all, force):
 
     if rss:
         cfg = check_initialization(ctx, check_website=True)
-        render_rss(cfg, force=True)
+        render_rss(None, cfg, force=True)
         ctx.exit()
 
     cfg = check_initialization(ctx)
+
+    if render_all:
+        if err := render_all_articles(cfg, force):
+            print(f"Error: {err}")
+        ctx.exit()
 
     if theme:
         themes = util.get_themes()
@@ -189,20 +193,10 @@ def render(ctx, filename, indexes, years, rss, theme, render_all, force):
             ctx.exit()
         util.change_theme(theme, cfg)
 
-    if indexes:
-        all_articles = tmpl_render.get_all_articles()
-        render_title_index(all_articles, cfg)
+    if index:
+        update_index_rss(cfg)
 
-    if years:
-        all_articles = tmpl_render.get_all_articles()
-        arts_in_years = tmpl_render.get_articles_in_years(all_articles)
-        render_years_html(arts_in_years, cfg)
-
-    if render_all:
-        if err := render_all_articles(cfg, force):
-            print(f"Error: {err}")
-
-    if indexes or years or render_all or theme:
+    if index or theme:
         ctx.exit()
 
     if len(filename) != 1:
@@ -210,6 +204,11 @@ def render(ctx, filename, indexes, years, rss, theme, render_all, force):
         ctx.exit()
 
     file_path = Path(filename[0])
+
+    if preview:
+        if err := preview_article(file_path, cfg):
+            print(f"Error: {err}")
+        ctx.exit()
 
     if err := util.check_filename(file_path, Articles_Folder_Path):
         print(f"Error: {err}")
@@ -230,7 +229,7 @@ def rename(ctx, filenames):
 
     boke rename articles/old-name.md articles/new-name.md
     """
-    check_initialization(ctx)
+    cfg = check_initialization(ctx)
     old_path, new_path = Path(filenames[0]), Path(filenames[1])
     if not old_path.exists():
         print(f"文件不存在: {old_path}")
@@ -238,6 +237,7 @@ def rename(ctx, filenames):
     if err := util.rename(old_path, new_path):
         print(f"Error: {err}")
         ctx.exit()
+    update_index_rss(cfg)
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS)

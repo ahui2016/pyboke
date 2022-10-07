@@ -24,19 +24,21 @@ MD_Suffix = ".md"
 RSS_Atom_XML = "atom.xml"
 Theme_CSS_Name = "theme.css"
 Default_Theme_Name = "simple"
+Temp_HTML = "temp.html"
 
 CWD = Path.cwd().resolve()
-Drafts_Folder_Path = CWD.joinpath(Drafts_Folder_Name)
-Articles_Folder_Path = CWD.joinpath(Articles_Folder_Name)
-Metadata_Folder_Path = Articles_Folder_Path.joinpath(Metadata_Folder_Name)
-Output_Folder_Path = CWD.joinpath(Output_Folder_Name)
-Pics_Folder_Path = Output_Folder_Path.joinpath(Pics_Folder_Name)
-RSS_Path = Output_Folder_Path.joinpath(RSS_Atom_XML)
-Theme_CSS_Path = Output_Folder_Path.joinpath(Theme_CSS_Name)
+Drafts_Folder_Path    = CWD.joinpath(Drafts_Folder_Name)
+Articles_Folder_Path  = CWD.joinpath(Articles_Folder_Name)
+Metadata_Folder_Path  = Articles_Folder_Path.joinpath(Metadata_Folder_Name)
+Output_Folder_Path    = CWD.joinpath(Output_Folder_Name)
+Pics_Folder_Path      = Output_Folder_Path.joinpath(Pics_Folder_Name)
+RSS_Path              = Output_Folder_Path.joinpath(RSS_Atom_XML)
+Theme_CSS_Path        = Output_Folder_Path.joinpath(Theme_CSS_Name)
+Temp_HTML_Path        = Output_Folder_Path.joinpath(Temp_HTML)
 Templates_Folder_Path = CWD.joinpath(Templates_Folder_Name)
-Themes_Folder_Path = Templates_Folder_Path.joinpath(Themes_Folder_Name)
-Draft_TMPL_Path = Templates_Folder_Path.joinpath(Draft_TMPL_Name)
-Blog_Config_Path = CWD.joinpath(Blog_Config_Filename)
+Themes_Folder_Path    = Templates_Folder_Path.joinpath(Themes_Folder_Name)
+Draft_TMPL_Path       = Templates_Folder_Path.joinpath(Draft_TMPL_Name)
+Blog_Config_Path      = CWD.joinpath(Blog_Config_Filename)
 
 Filename_Forbid_Pattern = re.compile(r"[^._0-9a-zA-Z\-]")
 """文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线)。"""

@@ -10,7 +10,7 @@ from .model import RSS_Atom_XML, Blog_Config_Filename, Blog_Config_Path, \
     Templates_Folder_Path, TOML_Suffix, ArticleConfig, Metadata_Folder_Path, \
     Draft_TMPL_Name, Output_Folder_Path, BlogConfig, HTML_Suffix, TitleIndex, \
     Title_Index_Length, RSS_Entries_Max, MD_Suffix, RSS_Content_Size, RSS_Path, \
-    Articles_Folder_Path
+    Articles_Folder_Path, Temp_HTML_Path
 
 # 注意: tmpl_render.py 不能 import util.py
 
@@ -46,14 +46,15 @@ def blog_updated_at_now(cfg):
     render_blog_config(cfg)
 
 
-def render_rss(cfg, force):
+def render_rss(rss_arts, cfg, force):
     if cfg.blog_updated > cfg.rss_updated or force:
-        all_arts = get_all_articles()
-        rss_arts = get_rss_articles(all_arts)
+        if rss_arts is None:
+            all_arts = get_all_articles()
+            rss_arts = get_rss_articles(all_arts)
         really_render_rss(rss_arts, cfg, force=True)
 
 
-def really_render_rss(articles, blog_cfg, force=False):
+def really_render_rss(articles, blog_cfg, force):
     """如果不强制渲染，则只在已经存在 RSS (atom.xml) 时才渲染。"""
     if not force and not RSS_Path.exists():
         return
@@ -262,7 +263,7 @@ def update_index_rss(blog_cfg):
     render_years_html(arts_in_years, blog_cfg)
     render_title_index(all_arts, blog_cfg)
     rss_arts = get_rss_articles(all_arts)
-    really_render_rss(rss_arts, blog_cfg)
+    render_rss(rss_arts, blog_cfg, force=False)
 
 
 def delete_article(md_path, toml_path, blog_cfg):
@@ -294,6 +295,16 @@ def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
 
 def preview_article(md_file: Path, blog_cfg: BlogConfig):
     """只渲染一个文件，不执行 update_index_rss() """
+    md_data = md_file.read_bytes()
+    art_toml_path = art_cfg_path_from_md_path(md_file)
+    if art_toml_path.exists():
+        art_cfg = ArticleConfig.loads(art_toml_path)
+    else:
+        art_cfg, err = ArticleConfig.from_md_file(md_file, md_data, blog_cfg.title_length_max)
+        if err:
+            return err
+
+    render_article_html(Temp_HTML_Path, md_data.decode(), blog_cfg, art_cfg)
 
 
 def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):

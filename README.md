@@ -139,13 +139,20 @@ drafts 文件夹，草稿可以放在这里。（但其实草稿放在硬盘里�
 
 ### 更改文件名
 
-如果需要更改 articles 文件夹内的文件名，可手动更改，同时 articles/metadata 内的
-的同名（不同后缀名）的文件也要改名。
+更改 articles 文件夹内的文件名时，必须同时更改对应的 toml 及 html 的文件名。
 
-建议使用 `boke rename` 命令，可自动更改 articles/metadata 内的对应文件名。
+建议使用 `boke rename` 命令，可自动更改对应的 toml 及 html 的文件名。
 
-例: `boke rename articles/old-name.md articles/new-name.md`
-或: `boke rename articles/old-name.md new-name.md`
+- 例: `boke rename articles/old-name.md articles/new-name.md`
+- 或: `boke rename articles/old-name.md new-name.md`
+
+## Preview (预览)
+
+- 预览是指将一个 Markdown 文件转换为 HTML, 输出文件名固定为 output/temp.html
+- 预览并非发布文章或修改文章，不会对博客产生任何修改。
+
+- 例: `boke render darfts/abc.md -preview`
+- 或: `boke render articles/abc.md -preview`
 
 ## Themes (主题)
 

@@ -8,7 +8,8 @@ from .model import Blog_Config_Path, CWD, Templates_Folder_Name, Articles_Folder
     Templates_Folder_Path, Output_Folder_Path, BlogConfig, Pics_Folder_Path, RSS_Atom_XML, \
     Metadata_Folder_Path, Drafts_Folder_Path, Default_Theme_Name, Themes_Folder_Path, \
     Theme_CSS_Path, MD_Suffix
-from .tmpl_render import render_blog_config, tmplfile, art_cfg_path_from_md_path
+from .tmpl_render import render_blog_config, tmplfile, art_cfg_path_from_md_path, \
+    html_path_from_md_path
 
 
 def dir_not_empty(path):
@@ -125,7 +126,7 @@ def check_filename(file: Path, parent_dir: Path, ensure_not_exist=False):
     if file.suffix != MD_Suffix:
         return f"后缀名不是 '{MD_Suffix}': {file}"
 
-    if file.name.lower() in ["index.md", "years.md", "title-index.md"]:
+    if file.name.lower() in ["index.md", "years.md", "title-index.md", "temp.md"]:
         return f"文件名不可用 {file.name}"
     if err := model.check_filename(file.name):
         return err
@@ -160,9 +161,13 @@ def rename(old_path, new_path):
     if err := check_filename(new_path, Articles_Folder_Path, ensure_not_exist=True):
         return err
 
+    print(f"rename(md/toml/html): {old_path.stem} => {new_path.stem}")
     new_md_path = Articles_Folder_Path.joinpath(new_path.name)
     old_path.rename(new_md_path)
     old_toml_path = art_cfg_path_from_md_path(old_path)
     new_toml_path = art_cfg_path_from_md_path(new_md_path)
     old_toml_path.rename(new_toml_path)
+    old_html_path = html_path_from_md_path(old_path)
+    new_html_path = html_path_from_md_path(new_md_path)
+    old_html_path.rename(new_html_path)
     return False

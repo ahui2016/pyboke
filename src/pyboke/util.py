@@ -28,6 +28,10 @@ def copy_static_files():
             dst = Output_Folder_Path.joinpath(src.name)
             print(f"Copy static file to {dst}")
             shutil.copyfile(src, dst)
+    rgignore_src = Output_Folder_Path.joinpath(".rgignore")
+    rgignore_dst = CWD.joinpath(".rgignore")
+    print(f"Move {rgignore_src} to {rgignore_dst}")
+    shutil.move(rgignore_src, rgignore_dst)
 
 
 def copy_theme_css(name):

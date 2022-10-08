@@ -51,7 +51,7 @@ def render_rss(rss_arts, cfg, force):
         if rss_arts is None:
             all_arts = get_all_articles()
             rss_arts = get_rss_articles(all_arts)
-        really_render_rss(rss_arts, cfg, force=True)
+        really_render_rss(rss_arts, cfg, force)
 
 
 def really_render_rss(articles, blog_cfg, force):
@@ -231,6 +231,18 @@ def delete_articles(all_md_files):
     return result
 
 
+def update_index_rss(blog_cfg):
+    all_arts = get_all_articles()
+    recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
+    html_filenames = get_all_html_filenames(all_arts)
+    render_index_html(recent_arts, html_filenames, blog_cfg)
+    arts_in_years = get_articles_in_years(all_arts)
+    render_years_html(arts_in_years, blog_cfg)
+    render_title_index(all_arts, blog_cfg)
+    rss_arts = get_rss_articles(all_arts)
+    render_rss(rss_arts, blog_cfg, force=False)
+
+
 def render_all_articles(blog_cfg: BlogConfig, force: bool):
     """
     :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
@@ -252,18 +264,6 @@ def render_all_articles(blog_cfg: BlogConfig, force: bool):
 
     update_index_rss(blog_cfg)
     return False
-
-
-def update_index_rss(blog_cfg):
-    all_arts = get_all_articles()
-    recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
-    html_filenames = get_all_html_filenames(all_arts)
-    render_index_html(recent_arts, html_filenames, blog_cfg)
-    arts_in_years = get_articles_in_years(all_arts)
-    render_years_html(arts_in_years, blog_cfg)
-    render_title_index(all_arts, blog_cfg)
-    rss_arts = get_rss_articles(all_arts)
-    render_rss(rss_arts, blog_cfg, force=False)
 
 
 def delete_article(md_path, toml_path, blog_cfg):

@@ -100,6 +100,8 @@ Static Blog Generator (极简博客生成器)
 第一次生成 atom.xml 需要执行 `boke render -rss`,
 后续在执行其它命令时会自动重新渲染 atom.xml
 
+只有执行 `boke render -rss` 才会强制更新 atom.xml, 其他任何情况下都是自动更新。
+
 本软件只提供有限的 RSS 功能：
 
 1. 只包含最新发布的 10 篇文章（并且该数字写死在代码里，用户不能自由设定）

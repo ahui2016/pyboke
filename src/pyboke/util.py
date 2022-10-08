@@ -48,9 +48,9 @@ def init_blog():
 
     Drafts_Folder_Path.mkdir()
     Articles_Folder_Path.mkdir()
-    Pics_Folder_Path.mkdir()
     Metadata_Folder_Path.mkdir()
     Output_Folder_Path.mkdir()
+    Pics_Folder_Path.mkdir()
     copy_templates()
     copy_static_files()
     copy_theme_css(Default_Theme_Name)

@@ -334,6 +334,7 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
 
         # 文章内容发生了变化，自动更新 title, checksum, mtime
         if art_cfg.checksum != art_cfg_new.checksum:
+            print(f"更新: {art_cfg_new.title}")
             art_cfg.title = art_cfg_new.title
             art_cfg.checksum = art_cfg_new.checksum
             art_cfg.mtime = model.now()

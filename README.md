@@ -66,25 +66,18 @@ Static Blog Generator (极简博客生成器)
 
 因此，如果想在不修改文章内容的情况下，修改文章的作者或日期，就需要强制渲染。
 
-- `boke render -force articles/filename` 强制渲染指定的一篇文章。
+- `boke render -force articles/filename` 强制渲染指定的一篇文章，并且渲染首页、索引等。
 - `boke render -index` 只强制渲染首页、索引等，不渲染文章
-- `boke render -force -all` 强制渲染全部文章。
+- `boke render -force -all` 强制渲染全部文章及首页、索引等。
 
 大多数情况下不需要强制渲染，但有一种情况：修改了 blog.toml 里的博客名称、作者名称
 等信息后，需要执行 `boke render -force -all` 强制渲全部文章。
-
-### 更改文章创建日期
-
-如果想修改一篇文章的创建日期，可手动修改该文章的 toml 文件中的 ctime,
-然后执行命令 `boke render -index`
-
-(toml 文件在 articles/metadata 文件夹里)
 
 ### 更改文章修改日期
 
 如果修改了文章的内容，在执行上述 `boke render` 相关命令时会自动更新文章的修改日期。
 
-如果想手动设定一篇文章的修改日期，可修改该文章的 toml 文件中的 mtime,
+如果想手动设定一篇文章的修改日期或创建日期，可修改该文章的 toml 文件中的 mtime 和 ctime,
 然后执行命令 `boke render articles/XXX.md -force`
 
 (toml 文件在 articles/metadata 文件夹里)
@@ -243,4 +236,7 @@ drafts 文件夹，草稿可以放在这里。
 各种工具进行搜索。
 
 例如可以使用 [ripgrep](https://github.com/BurntSushi/ripgrep), 在博客的根目录执行
-`rg -i 'keyword' articles` 即可查找包含 'keyword' 的文章，其中 `-i` 表示不分大小写。
+`rg -i 'keyword' articles` 即可查找包含 `keyword` 的文章，其中 `-i` 表示不分大小写。
+
+如果不搜索文章正文内容，只搜索文章标题，可打开网页 title-index.html(标题索引),
+按 `Ctrl+F` 在页面内搜索。

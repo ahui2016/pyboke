@@ -152,11 +152,9 @@ def get_themes():
 
 
 def change_theme(name, blog_cfg):
-    theme_file = Themes_Folder_Path.joinpath(f"{name}.css")
-    shutil.copyfile(theme_file, Theme_CSS_Path)
-    blog_cfg.current_theme = name
+    copy_theme_css(name)
+    blog_cfg.current_theme = name.lower()
     render_blog_config(blog_cfg)
-    print("OK.")
 
 
 def rename(old_path, new_path):

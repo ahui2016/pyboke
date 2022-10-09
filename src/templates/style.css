@@ -74,14 +74,14 @@ a {
   font-size: xx-large;
   display: flex;
   flex-wrap: wrap;
-  row-gap: 2rem;
-  column-gap: 2rem;
+  row-gap: 1.5rem;
+  column-gap: 1.5rem;
 }
 
 .TitleIndexItem {
   color: white;
   background-color: #A1A1AA;
-  padding: .35em .65em;
+  padding: .15em .45em;
   display: inline-block;
 }
 

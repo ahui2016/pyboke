@@ -15,8 +15,8 @@
     <title>{{ item.title }}</title>
     <link ref="alternate" href="{{ blog.website + item.id + '.html'}}" />
     <id>{{ item.id }}</id>
-    <published>{{ item.published }}</published>
-    <updated>{{ item.updated }}</updated>
+    <published>{{ item.ctime }}</published>
+    <updated>{{ item.mtime }}</updated>
     <author><name>
       {%- if item.author|length -%}
         {{ item.author }}

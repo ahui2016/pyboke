@@ -46,11 +46,9 @@ def blog_updated_at_now(cfg):
     render_blog_config(cfg)
 
 
-def render_rss(rss_arts, cfg, force):
+def render_rss(cfg, force):
     if cfg.blog_updated > cfg.rss_updated or force:
-        if rss_arts is None:
-            all_arts = get_all_articles()
-            rss_arts = get_rss_articles(all_arts)
+        rss_arts = get_rss_articles()
         really_render_rss(rss_arts, cfg, force)
 
 
@@ -66,11 +64,12 @@ def really_render_rss(articles, blog_cfg, force):
     render_blog_config(blog_cfg)
 
 
-def get_rss_articles(sorted_articles):
+def get_rss_articles():
     """
-    sorted_articles 应已按文章创建时间排序。
+    按文章的修改时间排列。
     sorted_articles 是一个 dict, 已经有 id, 详见 get_all_articles()
     """
+    sorted_articles = get_all_articles(key="mtime")
     recent_arts = get_recent_articles(sorted_articles, RSS_Entries_Max)
     for art in recent_arts:
         md_file = Articles_Folder_Path.joinpath(f"{art['id']}{MD_Suffix}")
@@ -81,7 +80,7 @@ def get_rss_articles(sorted_articles):
     return recent_arts
 
 
-def get_all_articles():
+def get_all_articles(key = "ctime"):
     """注意返回的不是 ArticleConfig, 而是 dict"""
     articles = Metadata_Folder_Path.glob(f"*{TOML_Suffix}")
     arts = []
@@ -90,7 +89,7 @@ def get_all_articles():
         art = asdict(art)
         art["id"] = art_path.stem
         arts.append(art)
-    return sorted(arts, key=itemgetter("ctime"), reverse=True)
+    return sorted(arts, key=itemgetter(key), reverse=True)
 
 
 def get_all_html_filenames(all_articles):
@@ -239,8 +238,7 @@ def update_index_rss(blog_cfg):
     arts_in_years = get_articles_in_years(all_arts)
     render_years_html(arts_in_years, blog_cfg)
     render_title_index(all_arts, blog_cfg)
-    rss_arts = get_rss_articles(all_arts)
-    render_rss(rss_arts, blog_cfg, force=False)
+    render_rss(blog_cfg, force=False)
 
 
 def render_all_articles(blog_cfg: BlogConfig, force: bool):

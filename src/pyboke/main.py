@@ -209,7 +209,7 @@ def render(ctx, filename, index, rss, theme, render_all, preview, force):
 
     if rss:
         cfg = check_initialization(ctx, check_website=True)
-        render_rss(None, cfg, force=True)
+        render_rss(cfg, force=True)
         ctx.exit()
 
     cfg = check_initialization(ctx)

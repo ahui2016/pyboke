@@ -18,6 +18,10 @@ a {
   text-decoration: none;
 }
 
+table {
+  margin-bottom: 2rem;
+}
+
 .small {
   font-size: small;
 }

@@ -164,7 +164,7 @@ drafts 文件夹，草稿可以放在这里。
 - simple: <https://simplecss.org/>
 - water: <https://watercss.kognise.dev/>
 
-网上还有一些类似的极简 CSS 主题，你可以自己找来放在 templates/themes 文件夹里，
+网上还有一些类似的极简 CSS 主题[^css-themes], 你可以自己找来放在 templates/themes 文件夹里，
 然后用 `boke render -theme name` 指定主题即可。
 
 使用命令 `boke -info` 可查看当前正在使用的主题及可供选择的主题。
@@ -223,3 +223,7 @@ toml 文件中的 `ignored` 修改为 `true`.
 
 如果不搜索文章正文内容，只搜索文章标题，可打开网页 title-index.html(标题索引),
 按 `Ctrl+F` 在页面内搜索。
+
+## 脚注
+
+[^css-themes]: 例如这里就有一些极简 CSS 主题: [github.com/dohliam/dropin-minimal-css](https://github.com/dohliam/dropin-minimal-css)

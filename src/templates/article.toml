@@ -15,6 +15,10 @@ mtime = '{{art.mtime}}'
 # sha1, 用来判断文章内容有无变更 [请勿手动修改]
 checksum = '{{art.checksum}}'
 
+# 是否忽略文章 (true/false)
+# 被忽略的文章不会出现在最近列表、索引列表里，但仍会出现在 RSS 里
+ignored = {{art.ignored|string|lower}}
+
 # HTML中的图片的最大宽度 (留空表示跟随总设定)
 img_width = '{{art.img_width}}'
 

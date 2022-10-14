@@ -46,9 +46,9 @@ def blog_updated_at_now(cfg):
     render_blog_config(cfg)
 
 
-def render_rss(cfg, force):
+def render_rss(all_articles, cfg, force):
     if cfg.blog_updated > cfg.rss_updated or force:
-        rss_arts = get_rss_articles()
+        rss_arts = get_rss_articles(all_articles)
         really_render_rss(rss_arts, cfg, force)
 
 
@@ -64,12 +64,12 @@ def really_render_rss(articles, blog_cfg, force):
     render_blog_config(blog_cfg)
 
 
-def get_rss_articles():
+def get_rss_articles(all_articles):
     """
     按文章的修改时间排列。
-    sorted_articles 是一个 dict, 已经有 id, 详见 get_all_articles()
+    all_articles 是一个 dict, 已经有 id, 详见 get_all_articles()
     """
-    sorted_articles = get_all_articles(key="mtime")
+    sorted_articles = sort_articles(all_articles, key="mtime")
     recent_arts = get_recent_articles(sorted_articles, RSS_Entries_Max)
     for art in recent_arts:
         md_file = Articles_Folder_Path.joinpath(f"{art['id']}{MD_Suffix}")
@@ -80,7 +80,7 @@ def get_rss_articles():
     return recent_arts
 
 
-def get_all_articles(key = "ctime"):
+def get_all_articles():
     """注意返回的不是 ArticleConfig, 而是 dict"""
     articles = Metadata_Folder_Path.glob(f"*{TOML_Suffix}")
     arts = []
@@ -89,8 +89,15 @@ def get_all_articles(key = "ctime"):
         art = asdict(art)
         art["id"] = art_path.stem
         arts.append(art)
-    return sorted(arts, key=itemgetter(key), reverse=True)
+    return arts
 
+
+def ignore_articles(articles):
+    return [art for art in articles if not art["ignored"]]
+
+
+def sort_articles(articles, key):
+    return sorted(articles, key=itemgetter(key), reverse=True)
 
 def get_all_html_filenames(all_articles):
     return [art["id"]+HTML_Suffix for art in all_articles]
@@ -211,7 +218,7 @@ def render_article_html(
 
 def delete_articles(all_md_files):
     """
-    :return: 需要删除的文件的数量 len(to_be_delete)
+    :return: 删除的文件的数量 len(to_be_delete)
     """
     all_id = [file.stem for file in all_md_files]
     all_metadata = Metadata_Folder_Path.glob(f"*{TOML_Suffix}")
@@ -232,13 +239,17 @@ def delete_articles(all_md_files):
 
 def update_index_rss(blog_cfg):
     all_arts = get_all_articles()
+    render_rss(all_arts, blog_cfg, force=False)
+
+    all_arts = ignore_articles(all_arts)
+    all_arts = sort_articles(all_arts, key="ctime")
+
     recent_arts = get_recent_articles(all_arts, blog_cfg.home_recent_max)
     html_filenames = get_all_html_filenames(all_arts)
     render_index_html(recent_arts, html_filenames, blog_cfg)
     arts_in_years = get_articles_in_years(all_arts)
     render_years_html(arts_in_years, blog_cfg)
     render_title_index(all_arts, blog_cfg)
-    render_rss(blog_cfg, force=False)
 
 
 def render_all_articles(blog_cfg: BlogConfig, force: bool):
@@ -249,18 +260,18 @@ def render_all_articles(blog_cfg: BlogConfig, force: bool):
     all_md_files = list(all_md_files)
     deleted_count = delete_articles(all_md_files)
 
-    updated_articles = []
+    updated_articles = 0
     for md_file in all_md_files:
-        err, art_cfg = add_or_update_article(md_file, blog_cfg, force)
+        err, need_to_render = add_or_update_article(md_file, blog_cfg, force)
         if err:
             return err
-        if art_cfg:
-            updated_articles.append(asdict(art_cfg))
+        if need_to_render:
+            updated_articles += 1
 
-    if deleted_count + len(updated_articles) == 0:
-        return False
+    if force or deleted_count + updated_articles > 0:
+        blog_updated_at_now(blog_cfg)
+        update_index_rss(blog_cfg)
 
-    update_index_rss(blog_cfg)
     return False
 
 
@@ -280,12 +291,13 @@ def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     """
     :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
     """
-    err, art_cfg = add_or_update_article(md_file, blog_cfg, force)
+    err, need_to_render = add_or_update_article(md_file, blog_cfg, force)
 
     if err:
         return err
 
-    if art_cfg:
+    if need_to_render:
+        blog_updated_at_now(blog_cfg)
         update_index_rss(blog_cfg)
 
     return False
@@ -310,13 +322,13 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     """
     在渲染全部文章时，本函数处理其中一个文件。
 
-    :return: 发生错误时返回 (str, None), 否则反回 (None, ArticleConfig) 或 (None, None).
+    :return: 发生错误时返回 (str, None), 否则反回 (None, need_to_render)
     """
     md_file_data = md_file.read_bytes()
     art_cfg_new, err = ArticleConfig.from_md_file(
         md_file, md_file_data, blog_cfg.title_length_max)
     if err:
-        return err, None
+        return err, False
 
     art_toml_path = art_cfg_path_from_md_path(md_file)
     need_to_render = False
@@ -338,21 +350,19 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
             art_cfg.mtime = model.now()
             need_to_render = True
 
-    # 需要渲染 toml
+    # 文章内容有变化，需要渲染 toml
     if need_to_render:
         tmpl = jinja_env.get_template(tmplfile["art_cfg"])
         art_toml_data = tmpl.render(dict(art=art_cfg))
         print(f"render and write {art_toml_path}")
         art_toml_path.write_text(art_toml_data, encoding="utf-8")
-        blog_updated_at_now(blog_cfg)
 
     # 需要渲染 html
     if need_to_render or force:
         html_path = html_path_from_md_path(md_file)
         render_article_html(html_path, md_file_data.decode(), blog_cfg, art_cfg)
-        return None, art_cfg
 
-    return None, None
+    return None, need_to_render
 
 
 def art_cfg_path_from_md_path(md_path):

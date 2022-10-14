@@ -11,7 +11,7 @@ from . import (
 from .model import BlogConfig, Articles_Folder_Path, Drafts_Folder_Path, \
     Draft_TMPL_Path, ArticleConfig
 from .tmpl_render import render_article, render_rss, render_all_articles, \
-    art_cfg_path_from_md_path, delete_article, preview_article, update_index_rss
+    art_cfg_path_from_md_path, delete_article, preview_article, update_index_rss, get_all_articles
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -209,7 +209,7 @@ def render(ctx, filename, index, rss, theme, render_all, preview, force):
 
     if rss:
         cfg = check_initialization(ctx, check_website=True)
-        render_rss(cfg, force=True)
+        render_rss(get_all_articles(), cfg, force=True)
         ctx.exit()
 
     cfg = check_initialization(ctx)

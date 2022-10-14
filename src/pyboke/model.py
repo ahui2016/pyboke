@@ -105,6 +105,7 @@ class ArticleConfig:
     ctime     : str   # 文章创建时间
     mtime     : str   # 文章修改时间
     checksum  : str   # sha1, 用来判断文章内容有无变更
+    ignored   : bool  # 忽略文章 (不出现在索引列表里，但仍会出现在 RSS 里)
     img_width : str   # HTML中的图片的最大宽度 (留空表示跟随总设定)
     replace   : int   # 是否执行自动替换 (0:跟随总设定, -1:不执行, 1:执行)
     pairs     : list  # 自动替换（主要用于替换图片地址）
@@ -131,14 +132,15 @@ class ArticleConfig:
             return None, f"无法获取文章标题，请修改文章的标题(文件的第一行内容): {file_path}"
 
         art_cfg = ArticleConfig(
-            title    = title,
-            author   = "",
-            ctime    = ctime,
-            mtime    = ctime,
-            checksum = checksum,
+            title     = title,
+            author    = "",
+            ctime     = ctime,
+            mtime     = ctime,
+            checksum  = checksum,
+            ignored   = False,
             img_width = "",
-            replace  = 0,
-            pairs    = [],
+            replace   = 0,
+            pairs     = [],
         )
         return art_cfg, None
 

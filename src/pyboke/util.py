@@ -130,7 +130,8 @@ def check_filename(file: Path, parent_dir: Path, ensure_not_exist=False):
     if file.suffix != MD_Suffix:
         return f"后缀名不是 '{MD_Suffix}': {file}"
 
-    if file.name.lower() in ["index.md", "years.md", "title-index.md", "temp.md"]:
+    names = ["index.md", "years.md", "random.md", "title-index.md", "temp.md"]
+    if file.name.lower() in names:
         return f"文件名不可用 {file.name}"
     if err := model.check_filename(file.name):
         return err

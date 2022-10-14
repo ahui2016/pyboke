@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block main %}
+<header>
+  <h1>{{ blog.name }}</h1>
+</header>
+
+<h3>Go to an article randomly</h3>
+
+<p>访问本页会随机访问一篇文章（自动跳转）</p>
+
+{% endblock %}
+
+{% block footer %}
+<div id="footer">
+  <p id="footer-body">
+    Author: {{ blog.author }}
+    | LICENSE <a href="LICENSE.txt">CC0-1.0</a>
+    | RSS <a href="atom.xml">atom.xml</a>
+  </p>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+const files = {{ files|safe }}
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min) + min);
+}
+function randomlyGo() {
+  const i = getRandomInt(0, files.length);
+  location.href = files[i];
+}
+randomlyGo()
+</script>
+{% endblock %}

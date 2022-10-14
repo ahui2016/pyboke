@@ -21,15 +21,16 @@ jinja_env = jinja2.Environment(
 
 # 渲染时，除了 tmplfile 之外, templates 文件夹里的全部文件都会被复制到 output 文件夹。
 tmplfile = dict(
-    blog_cfg=Blog_Config_Filename,
-    art_cfg="article.toml",
-    draft=Draft_TMPL_Name,
-    base="base.html",
-    index="index.html",
-    years="years.html",
-    title_index="title-index.html",
-    article="article.html",
-    rss=RSS_Atom_XML,
+    blog_cfg    = Blog_Config_Filename,
+    art_cfg     = "article.toml",
+    draft       = Draft_TMPL_Name,
+    base        = "base.html",
+    index       = "index.html",
+    years       = "years.html",
+    article     = "article.html",
+    random      = "random.html",
+    title_index = "title-index.html",
+    rss         = RSS_Atom_XML,
 )
 
 
@@ -148,42 +149,40 @@ def sort_by_title_index(indexes: dict) -> list:
     return result
 
 
-def render_title_index(all_articles, blog_cfg):
-    indexes = get_title_indexes(all_articles)
-    tmpl = jinja_env.get_template(tmplfile["title_index"])
-    html = tmpl.render(dict(
-        indexes=sort_by_title_index(indexes),
-        blog=blog_cfg,
-        parent_dir=""
-    ))
-    output_path = Output_Folder_Path.joinpath(tmplfile["title_index"])
+def render_write_html(page_name: str, data: dict, output_path: Path = None):
+    if output_path is None:
+        output_path = Output_Folder_Path.joinpath(tmplfile[page_name])
+    tmpl = jinja_env.get_template(tmplfile[page_name])
+    html = tmpl.render(data)
     print(f"render and write {output_path}")
     output_path.write_text(html, encoding="utf-8")
 
 
+def render_title_index(all_articles, blog_cfg):
+    indexes = get_title_indexes(all_articles)
+    render_write_html("title_index", dict(
+        indexes=sort_by_title_index(indexes),
+        blog=blog_cfg,
+        parent_dir=""
+    ))
+
+
 def render_index_html(recent_articles, html_filenames, blog_cfg):
-    tmpl = jinja_env.get_template(tmplfile["index"])
-    html = tmpl.render(dict(
+    render_write_html("index", dict(
         blog=blog_cfg,
         articles=recent_articles,
         files=html_filenames,
         parent_dir=""
     ))
-    output_path = Output_Folder_Path.joinpath(tmplfile["index"])
-    print(f"render and write {output_path}")
-    output_path.write_text(html, encoding="utf-8")
+    render_write_html("random", dict(blog=blog_cfg, files=html_filenames))
 
 
 def render_years_html(year_articles, blog_cfg):
-    tmpl = jinja_env.get_template(tmplfile["years"])
-    html = tmpl.render(dict(
+    render_write_html("years", dict(
         year_articles=year_articles,
         blog=blog_cfg,
         parent_dir=""
     ))
-    output_path = Output_Folder_Path.joinpath(tmplfile["years"])
-    print(f"render and write {output_path}")
-    output_path.write_text(html, encoding="utf-8")
 
 
 def replace_or_not(art_cfg : ArticleConfig, blog_cfg: BlogConfig):
@@ -210,10 +209,8 @@ def render_article_html(
     index_id = art["title"][:Title_Index_Length].encode().hex()
     art["index_id"] = f"i{index_id}"
     art["content"] = mistune.html(md_text)
-    tmpl = jinja_env.get_template(tmplfile["article"])
-    html = tmpl.render(dict(blog=blog_cfg, art=art, parent_dir=""))
-    print(f"render and write {html_path}")
-    html_path.write_text(html, encoding="utf-8")
+    render_write_html(
+        "article", dict(blog=blog_cfg, art=art, parent_dir=""), html_path)
 
 
 def delete_articles(all_md_files):

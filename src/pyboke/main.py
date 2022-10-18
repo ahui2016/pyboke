@@ -228,7 +228,7 @@ def render(ctx, filename, index, rss, theme, render_all, preview, force):
         util.change_theme(theme, cfg)
 
     if index:
-        update_index_rss(cfg)
+        update_index_rss(cfg, force=True)
 
     if index or theme:
         ctx.exit()
@@ -268,7 +268,7 @@ def rename(ctx, filenames):
     if err := util.rename(old_path, new_path):
         print(f"Error: {err}")
         ctx.exit()
-    update_index_rss(cfg)
+    update_index_rss(cfg, force=True)
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS)

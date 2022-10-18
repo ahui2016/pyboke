@@ -82,7 +82,7 @@ class BlogConfig:
             uuid             = "",  # 在第一次填写博客名称时生成
             website          = "在此填写博客网址",
             rss_link         = "",  # 在博客名称变更时生成
-            home_recent_max  = 20,
+            home_recent_max  = 10,
             title_length_max = 192,
             rss_updated      = "",
             blog_updated     = now(),

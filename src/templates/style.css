@@ -41,7 +41,6 @@ table {
   display: flex;
   flex-wrap: wrap;
   gap: 0 1rem;
-  margin-bottom: 5rem;
 }
 
 .art-info {
@@ -58,6 +57,10 @@ table {
 #footer {
   font-size: small;
   border-top: 1px solid #ccc;
+}
+
+.index-footer {
+  margin-top: 5rem;
 }
 
 #footer-home-link {

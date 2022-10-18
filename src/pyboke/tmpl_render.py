@@ -234,9 +234,9 @@ def delete_articles(all_md_files):
     return result
 
 
-def update_index_rss(blog_cfg):
+def update_index_rss(blog_cfg, force=False):
     all_arts = get_all_articles()
-    render_rss(all_arts, blog_cfg, force=False)
+    render_rss(all_arts, blog_cfg, force=force)
 
     all_arts = ignore_articles(all_arts)
     all_arts = sort_articles(all_arts, key="ctime")

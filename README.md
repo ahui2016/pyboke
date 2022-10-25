@@ -15,10 +15,27 @@ Static Blog Generator (极简博客生成器)
 3. **删除文章**：直接删除 articles 文件夹里的文件。
 4. 执行命令 `boke render -all`
 
-- 添加文章时，不需要在任何地方填写文章标题、标签、日期、作者姓名……
+- 添加文章时，不需要在任何地方填写文章标题、文章分类、标签、日期……
   这些全部都不用管，只管写文章。
 - 不需要每次都执行 `boke render`, 可以在添加/修改了一篇或多篇文章后，
   包括删除一些文章后，再统一执行 `boke render -all` 即可。
+
+## 安装与初始化
+
+要求 Python 3.10 或以上，如果你的系统中未安装 Python 3.10,
+推荐使用 [pyenv](https://github.com/pyenv/pyenv) 或
+[miniconda](https://docs.conda.io/en/latest/miniconda.html)
+来安装最新版本的 Python。
+
+例如，安装 miniconda 后，可以这样创建 3.10 环境：
+
+```sh
+$ conda create --name py310 python=3.10
+$ conda activate py310
+```
+
+安装非常简单，只要 `pip install pyboke` 即可。  
+另外推荐采用 [pipx](https://pypa.github.io/pipx/) 进行安装。
 
 ## 创建一个新博客
 
@@ -103,6 +120,11 @@ Static Blog Generator (极简博客生成器)
 1. 只包含最新发布的 10 篇文章（并且该数字写死在代码里，用户不能自由设定）
 2. 只包含内容摘要，不包含全文
 
+### 排序
+
+- RSS 按照文章的修改日期排序
+- 博客首页的 "最新发布" 按照文章的创建日期排序
+
 ## 草稿
 
 如上文所示，添加文章只需要把 markdown 文件放进 articles 文件夹即可，操作非常简单明瞭。
@@ -182,10 +204,10 @@ drafts 文件夹，草稿可以放在这里。
 在自定义模板时，可能需要增加一些特殊的页面，比如 "关于我", "关于本站" 等等，
 这些页面可以当作一篇普通的文章来发布，然后在 template/index.html 里添加固定的链接。
 
-如果不希望这些特殊文章出现在 "最近发布", "标题索引" 等列表中，可以将其对应的
+如果不希望这些特殊文章出现在 "最新发布", "标题索引" 等列表中，可以将其对应的
 toml 文件中的 `ignored` 修改为 `true`.
 
-注意，这个忽略功能并非隐藏文章， 被忽略的文章不会出现在最近发布、索引列表里，
+注意，这个忽略功能并非隐藏文章， 被忽略的文章不会出现在最新发布、索引列表里，
 但仍会出现在 RSS 里。
 
 ## LICENSE (许可证)
@@ -224,6 +246,10 @@ toml 文件中的 `ignored` 修改为 `true`.
 如果不搜索文章正文内容，只搜索文章标题，可打开网页 title-index.html(标题索引),
 按 `Ctrl+F` 在页面内搜索。
 
-## 脚注
 
 [^css-themes]: 例如这里就有一些极简 CSS 主题: [github.com/dohliam/dropin-minimal-css](https://github.com/dohliam/dropin-minimal-css)
+
+## 我的博客
+
+作为参考，可以看看我的博客，就是用 PyBoke 生成的。
+<https://ahui2016.github.io/>

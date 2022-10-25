@@ -103,3 +103,13 @@ table {
 #title-index {
   margin-bottom: 5rem;
 }
+
+.footnote-ref {
+  background-color: yellow;
+}
+
+.footnotes {
+  margin-top: 150px;
+  font-size: smaller;
+}
+

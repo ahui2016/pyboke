@@ -20,7 +20,7 @@ Static Blog Generator (极简博客生成器)
 - 不需要每次都执行 `boke render`, 可以在添加/修改了一篇或多篇文章后，
   包括删除一些文章后，再统一执行 `boke render -all` 即可。
 
-## 安装与初始化
+## 安装
 
 要求 Python 3.10 或以上，如果你的系统中未安装 Python 3.10,
 推荐使用 [pyenv](https://github.com/pyenv/pyenv) 或
@@ -66,6 +66,10 @@ $ conda activate py310
 - 其中, TOML 里有文章的标题、作者、创建日期、修改日期等信息。
 - 大多数情况下你都可以忘记 articles/metadata 里的 toml 文件，不需要修改它。
 - 推荐使用 `boke new` 和 `boke post` 命令，详见后文 **草稿** 部分。
+
+### 关于 Markdown
+
+本软件只支持最基本的 Markdown 语法，详见 <https://ahui2016.github.io/pyboke-markdown.html>
 
 ## 修改文章内容
 

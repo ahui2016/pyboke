@@ -17,7 +17,7 @@ def dir_not_empty(path):
 
 
 def copy_templates():
-    src_folder = Path(__file__).parent.parent.joinpath(Templates_Folder_Name)
+    src_folder = Path(__file__).parent.joinpath(Templates_Folder_Name)
     shutil.copytree(src_folder, Templates_Folder_Path)
 
 

@@ -30,20 +30,22 @@ Static Blog Generator (极简博客生成器)
 例如，安装 miniconda 后，可以这样创建 3.10 环境：
 
 ```sh
-$ conda create --name py310 python=3.10
+$ conda create --name py310 python=3.10.6
 $ conda activate py310
 ```
 
 安装非常简单，只要 `pip install pyboke` 即可。  
-另外推荐采用 [pipx](https://pypa.github.io/pipx/) 进行安装。
+
+(另外推荐了解一下 [pipx](https://pypa.github.io/pipx/)
+这是用来安装 Python 命令行软件的优秀工具）
 
 ## 创建一个新博客
 
 1. `mkdir my-blog` _(新建一个空文件夹)_
 2. `cd my-blog` _(进入空文件夹内)_
-3. `boke init` _(初始化博客，创建一些必要的文件和文件夹)_
+3. `boke init` _(初始化博客)_
 
-然后可以在当前文件内看到以下文件与文件夹：
+成功后，可以在当前文件内看到以下文件与文件夹：
 
 - **articles** (全部文章都在这里，采用 markdown 格式, `.md` 后缀名)
 - **articles/metadata** (与 markdown 文件一一对应的 toml 文件)
@@ -249,6 +251,19 @@ toml 文件中的 `ignored` 修改为 `true`.
 
 如果不搜索文章正文内容，只搜索文章标题，可打开网页 title-index.html(标题索引),
 按 `Ctrl+F` 在页面内搜索。
+
+## 建议使用终端文本编辑器
+
+本软件的大部分操作都需要在终端输入命令, 有时需要稍稍修改一下 toml,
+这种情况下如果切换到文本编辑器去操作, 会感觉有点麻烦, 因此建议使用类似
+Vim/Emacs 的终端文本编辑器, 就很方便.
+
+我找到了 [micro](https://github.com/zyedidia/micro), 它类似 Vim/Emacs
+并且更轻, 也更易学易用, 优点:
+
+- 启动速度飞快, 感觉非常轻巧.
+- 非常易学易用, 支持鼠标选择, 以及用 Ctrl-C / Ctrl-V 来复制黏贴.  
+  支持 Ctrl-S 保存 / Ctrl-A 全选等符合现代习惯的快捷键.
 
 
 [^css-themes]: 例如这里就有一些极简 CSS 主题: [github.com/dohliam/dropin-minimal-css](https://github.com/dohliam/dropin-minimal-css)

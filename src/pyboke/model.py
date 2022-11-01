@@ -41,7 +41,7 @@ Draft_TMPL_Path       = Templates_Folder_Path.joinpath(Draft_TMPL_Name)
 Blog_Config_Path      = CWD.joinpath(Blog_Config_Filename)
 
 Filename_Forbid_Pattern = re.compile(r"[^._0-9a-zA-Z\-]")
-"""文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线)。"""
+"""文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线), .(点)。"""
 
 Markdown_Title_Pattern = re.compile(r"^(#{1,6}|>|1.|-|\*) (.+)")
 

@@ -45,16 +45,16 @@ $ conda activate py310
 2. `cd my-blog` _(进入空文件夹内)_
 3. `boke init` _(初始化博客)_
 
-成功后，可以在当前文件内看到以下文件与文件夹：
+成功后，可以在当前文件夹内看到以下文件与文件夹：
 
 - **articles** (全部文章都在这里，采用 markdown 格式, `.md` 后缀名)
 - **articles/metadata** (与 markdown 文件一一对应的 toml 文件)
 - **drafts** (待发布的草稿放在这里)
 - **output** (程序生成的 HTML, RSS 等文件将会输出到该文件夹)
 - **templates** (Jinja2模板 与 CSS文件)
-- **boke.toml** (博客名称、作者名称等)
+- **blog.toml** (博客名称、作者名称等)
 
-请用文本编辑器打开 boke.toml 填写博客名称、作者名称等。
+请用文本编辑器打开 blog.toml 填写博客名称、作者名称等。
 
 执行命令 `boke -info` 查看博客信息。
 
@@ -62,6 +62,7 @@ $ conda activate py310
 
 - 文件后缀必须是 ".md", 文件内容必须采用 Markdown 格式, 使用 utf-8 编码。
 - 文件名只能使用 0-9, a-z, A-Z, _(下划线), -(短横线), .(点)。
+- 文件名会成为网址的一部分, 因此建议尽量短一点.
 - 把 md 文件放入 articles 文件夹，执行 `boke render articles/filename`,
   会在 **articles/metadata** 文件夹里生成 TOML 文件，
   在 **output** 文件夹生成 HTML 文件。

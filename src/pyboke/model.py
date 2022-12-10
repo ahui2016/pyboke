@@ -169,7 +169,7 @@ def tomli_loads(file) -> dict:
         try:
             text = text.decode()  # Default encoding is 'utf-8'.
         except UnicodeDecodeError:
-            text = text.decode("utf-16").encode().decode()
+            text = text.decode("utf-16").encode("utf-8").decode("utf-8")
         return tomli.loads(text)
 
 

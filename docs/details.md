@@ -70,9 +70,9 @@ Static Blog Generator (极简博客生成器)
 - drafts (待发布的草稿放在这里)
 - output (程序生成的 HTML, RSS 等文件将会输出到该文件夹)
 - templates (Jinja2模板 与 CSS文件)
-- boke.toml (博客名称、作者名称等等)
+- blog.toml (博客名称、作者名称等等)
 
-请用文本编辑器打开 boke.toml 填写博客名称、作者名称等。
+请用文本编辑器打开 blog.toml 填写博客名称、作者名称等。
 
 建议尽量少用图片，本程序未为大量图片做优化。
 

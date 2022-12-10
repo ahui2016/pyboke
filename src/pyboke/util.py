@@ -45,7 +45,7 @@ def init_blog():
     """
     在一个空文件夹中初始化一个博客。
 
-    :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
+    :return: 发生错误时返回 err_msg: str, 没有错误则返回空字符串。
     """
     if dir_not_empty(CWD):
         return f"Folder Not Empty: {CWD}"
@@ -60,6 +60,7 @@ def init_blog():
     copy_theme_css(Default_Theme_Name)
     render_blog_config(BlogConfig.default())
     print(f"请用文本编辑器打开 {Blog_Config_Path} 填写博客名称、作者名称等。")
+    return ""
 
 
 def blog_file_folders_exist():

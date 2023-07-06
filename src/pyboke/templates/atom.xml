@@ -24,7 +24,7 @@
         {{ blog.author }}
       {%- endif -%}
     </name></author>
-    <content type="text">{{ item.content }}</content>
+    <content type="html">{{ item.content }}</content>
   </entry>
   {% endfor %}
 

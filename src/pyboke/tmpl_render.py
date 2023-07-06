@@ -4,6 +4,7 @@ from pathlib import Path
 
 import jinja2
 import mistune
+import markdown
 
 from . import model
 from .model import RSS_Atom_XML, Blog_Config_Filename, Blog_Config_Path, \
@@ -74,10 +75,11 @@ def get_rss_articles(all_articles):
     recent_arts = get_recent_articles(sorted_articles, RSS_Entries_Max)
     for art in recent_arts:
         md_file = Articles_Folder_Path.joinpath(f"{art['id']}{MD_Suffix}")
-        content = md_file.read_text(encoding="utf-8")
-        if len(content) > RSS_Content_Size:
-            content = content[:RSS_Content_Size] + "..."
-        art["content"] = content
+        md_content = md_file.read_text(encoding="utf-8")
+        html_content = markdown.markdown(md_content)
+        if len(html_content) > RSS_Content_Size:
+            html_content = html_content[:RSS_Content_Size] + "..."
+        art["content"] = html_content
     return recent_arts
 
 

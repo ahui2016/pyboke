@@ -76,6 +76,8 @@ def get_rss_articles(all_articles):
     for art in recent_arts:
         md_file = Articles_Folder_Path.joinpath(f"{art['id']}{MD_Suffix}")
         md_content = md_file.read_text(encoding="utf-8")
+        # 删除第一行的标题
+        md_content = "\n".join(md_content.split("\n")[1:])
         html_content = markdown.markdown(md_content)
         if len(html_content) > RSS_Content_Size:
             html_content = html_content[:RSS_Content_Size] + "..."

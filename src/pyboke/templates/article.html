@@ -29,10 +29,11 @@
 </div>
 
 {% if art.prev %}
-<a href="{{ art.prev.id }}.html">Previous Article</a>
+<a href="{{ art.prev.id }}.html">Previous: {{ art.prev.title }}</a>
 {% endif %}
-<a href="{{ art.next.id }}.html">Next Article</a>
-<a href="index.html">Index</a>
+{% if art.next %}
+<a href="{{ art.next.id }}.html">Next: {{ art.next.title }}</a>
+{% endif %}
 {% endblock %}
 
 {% block footer %}

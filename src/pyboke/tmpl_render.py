@@ -36,16 +36,18 @@ tmplfile = dict(
 
 def find_next_article(art: ArticleConfig, all_arts):
     """根据ctime找到下一篇文章"""
+    all_arts = ignore_articles(all_arts)
     all_arts = sort_articles(all_arts, key="ctime")
     for i, a in enumerate(all_arts):
-        if a['ctime'] == art.ctime:
+        if a['ctime'] == art.ctime and a['title'] == art.title:
             return all_arts[i+1] if i+1 < len(all_arts) else None
 
 def find_prev_article(art: ArticleConfig, all_arts):
     """根据ctime找到上一篇文章"""
+    all_arts = ignore_articles(all_arts)
     all_arts = sort_articles(all_arts, key="ctime")
     for i, a in enumerate(all_arts):
-        if a['ctime'] == art.ctime:
+        if a['ctime'] == art.ctime and a['title'] == art.title:
             return all_arts[i-1] if i-1 >= 0 else None
 
 def render_blog_config(cfg):

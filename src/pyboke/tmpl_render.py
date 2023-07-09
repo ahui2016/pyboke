@@ -230,9 +230,9 @@ def render_article_html(
     index_id = art["title"][:Title_Index_Length].encode().hex()
     art["index_id"] = f"i{index_id}"
     art["content"] = mistune.html(md_text)
-    if next_art_cfg is not None:
+    if next_art_cfg:
         art["next"] = next_art_cfg
-    if prev_art_cfg is not None:
+    if prev_art_cfg:
         art["prev"] = prev_art_cfg
     render_write_html(
         "article", dict(blog=blog_cfg, art=art, parent_dir=""), html_path)
@@ -327,7 +327,6 @@ def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
 
 def preview_article(md_file: Path, blog_cfg: BlogConfig):
     """只渲染一个文件，不执行 update_index_rss() """
-    all_arts = get_all_articles()
     md_data = md_file.read_bytes()
     art_toml_path = art_cfg_path_from_md_path(md_file)
     if art_toml_path.exists():
@@ -338,12 +337,16 @@ def preview_article(md_file: Path, blog_cfg: BlogConfig):
             return err
 
     art_cfg.mtime = model.now()
-    render_article_html(Temp_HTML_Path, md_data.decode(), blog_cfg, art_cfg, next_art_cfg=find_next_article(art_cfg,all_arts=all_arts, prev_art_cfg=find_prev_article(art_cfg, all_arts=all_arts)))
+    render_article_html(Temp_HTML_Path, md_data.decode(), blog_cfg, art_cfg, 
+                        next_art_cfg=find_next_article(art_cfg,all_arts=get_all_articles()), 
+                        prev_art_cfg=find_prev_article(art_cfg, all_arts=get_all_articles()))
 
 
 def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     """
     在渲染全部文章时，本函数处理其中一个文件。
+    在第一次渲染全部文章时，get_all_articles() 无法获取完整文章列表
+    因此无法获取 next_art_cfg 和 prev_art_cfg，需要在渲染全部文章后再次渲染全部文章。
 
     :return: 发生错误时返回 (str, None), 否则反回 (None, need_to_render)
     """
@@ -355,7 +358,6 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
 
     art_toml_path = art_cfg_path_from_md_path(md_file)
     need_to_render = False
-    all_arts = get_all_articles()
 
     # article toml 不存在，以 art_cfg_new 为准
     if not art_toml_path.exists():
@@ -382,10 +384,13 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
         print(f"render and write {art_toml_path}")
         art_toml_path.write_text(art_toml_data, encoding="utf-8")
 
+    all_arts = get_all_articles()
     # 需要渲染 html
     if need_to_render or force:
         html_path = html_path_from_md_path(md_file)
-        render_article_html(html_path, md_file_data.decode(), blog_cfg, art_cfg, next_art_cfg=find_next_article(art_cfg, all_arts=all_arts), prev_art_cfg=find_prev_article(art_cfg, all_arts=all_arts))    
+        render_article_html(html_path, md_file_data.decode(), blog_cfg, art_cfg, 
+                            next_art_cfg=find_next_article(art_cfg, all_arts=get_all_articles()),
+                            prev_art_cfg=find_prev_article(art_cfg, all_arts=get_all_articles())) 
 
     return None, need_to_render
 

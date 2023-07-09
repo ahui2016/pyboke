@@ -27,6 +27,12 @@
 <div id="updated-at">
   <span>Updated at {{ art.mtime[0:19] }}</span>
 </div>
+
+{% if art.prev %}
+<a href="{{ art.prev.id }}.html">Previous Article</a>
+{% endif %}
+<a href="{{ art.next.id }}.html">Next Article</a>
+<a href="index.html">Index</a>
 {% endblock %}
 
 {% block footer %}

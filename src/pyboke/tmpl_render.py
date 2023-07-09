@@ -34,6 +34,19 @@ tmplfile = dict(
     rss         = RSS_Atom_XML,
 )
 
+def find_next_article(art: ArticleConfig, all_arts):
+    """根据ctime找到下一篇文章"""
+    all_arts = sort_articles(all_arts, key="ctime")
+    for i, a in enumerate(all_arts):
+        if a['ctime'] == art.ctime:
+            return all_arts[i+1] if i+1 < len(all_arts) else None
+
+def find_prev_article(art: ArticleConfig, all_arts):
+    """根据ctime找到上一篇文章"""
+    all_arts = sort_articles(all_arts, key="ctime")
+    for i, a in enumerate(all_arts):
+        if a['ctime'] == art.ctime:
+            return all_arts[i-1] if i-1 >= 0 else None
 
 def render_blog_config(cfg):
     tmpl = jinja_env.get_template(tmplfile["blog_cfg"])
@@ -204,6 +217,8 @@ def render_article_html(
         md_text : str,
         blog_cfg: BlogConfig,
         art_cfg : ArticleConfig,
+        next_art_cfg : ArticleConfig = None,
+        prev_art_cfg : ArticleConfig = None,
 ):
     if replace_or_not(art_cfg, blog_cfg):
         for pair in art_cfg.pairs:
@@ -213,6 +228,10 @@ def render_article_html(
     index_id = art["title"][:Title_Index_Length].encode().hex()
     art["index_id"] = f"i{index_id}"
     art["content"] = mistune.html(md_text)
+    if next_art_cfg is not None:
+        art["next"] = next_art_cfg
+    if prev_art_cfg is not None:
+        art["prev"] = prev_art_cfg
     render_write_html(
         "article", dict(blog=blog_cfg, art=art, parent_dir=""), html_path)
 
@@ -306,6 +325,7 @@ def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
 
 def preview_article(md_file: Path, blog_cfg: BlogConfig):
     """只渲染一个文件，不执行 update_index_rss() """
+    all_arts = get_all_articles()
     md_data = md_file.read_bytes()
     art_toml_path = art_cfg_path_from_md_path(md_file)
     if art_toml_path.exists():
@@ -316,7 +336,7 @@ def preview_article(md_file: Path, blog_cfg: BlogConfig):
             return err
 
     art_cfg.mtime = model.now()
-    render_article_html(Temp_HTML_Path, md_data.decode(), blog_cfg, art_cfg)
+    render_article_html(Temp_HTML_Path, md_data.decode(), blog_cfg, art_cfg, next_art_cfg=find_next_article(art_cfg,all_arts=all_arts, prev_art_cfg=find_prev_article(art_cfg, all_arts=all_arts)))
 
 
 def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
@@ -333,6 +353,7 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
 
     art_toml_path = art_cfg_path_from_md_path(md_file)
     need_to_render = False
+    all_arts = get_all_articles()
 
     # article toml 不存在，以 art_cfg_new 为准
     if not art_toml_path.exists():
@@ -362,7 +383,7 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     # 需要渲染 html
     if need_to_render or force:
         html_path = html_path_from_md_path(md_file)
-        render_article_html(html_path, md_file_data.decode(), blog_cfg, art_cfg)
+        render_article_html(html_path, md_file_data.decode(), blog_cfg, art_cfg, next_art_cfg=find_next_article(art_cfg, all_arts=all_arts), prev_art_cfg=find_prev_article(art_cfg, all_arts=all_arts))    
 
     return None, need_to_render
 

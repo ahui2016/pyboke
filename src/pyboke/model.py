@@ -159,7 +159,7 @@ class ArticleConfig:
 class TitleIndex:
     name: str
     id: str
-    articles: []  # List[ArticleConfig]
+    articles: list  # List[ArticleConfig]
 
 
 def tomli_loads(file) -> dict:

@@ -65,7 +65,7 @@ def blog_updated_at_now(cfg):
 
 def render_rss(all_articles, cfg, force):
     if cfg.blog_updated > cfg.rss_updated or force:
-        rss_arts = get_rss_articles(all_articles)
+        rss_arts = get_rss_articles(all_articles, cfg)
         really_render_rss(rss_arts, cfg, force)
 
 
@@ -81,7 +81,10 @@ def really_render_rss(articles, blog_cfg, force):
     render_blog_config(blog_cfg)
 
 
-def get_rss_articles(all_articles):
+def get_rss_articles(
+        all_articles,
+        blog_cfg: BlogConfig
+    ):
     """
     按文章的修改时间排列。
     all_articles 是一个 dict, 已经有 id, 详见 get_all_articles()
@@ -89,13 +92,23 @@ def get_rss_articles(all_articles):
     sorted_articles = sort_articles(all_articles, key="mtime")
     recent_arts = get_recent_articles(sorted_articles, RSS_Entries_Max)
     for art in recent_arts:
+        art_cfg = ArticleConfig.loads(art_cfg_path_from_md_path(art["path"]))
         md_file = Articles_Folder_Path.joinpath(f"{art['id']}{MD_Suffix}")
         md_content = md_file.read_text(encoding="utf-8")
         # 删除第一行的标题
         md_content = "\n".join(md_content.split("\n")[1:])
+
+        if replace_or_not(art_cfg, blog_cfg):
+        # add prefix before relative image path
+            md_content = md_content.replace("](./", f"]({blog_cfg.img_prefix}")
+            md_content = md_content.replace("](pics/", f"]({blog_cfg.img_prefix}pics/")
+            md_content = md_content.replace("](../output/pics/", f"]({blog_cfg.img_prefix}pics/")
+            for pair in art_cfg.pairs:
+                md_text = md_text.replace(pair[0], pair[1], 1)
+
         html_content = markdown.markdown(md_content)
-        if len(html_content) > RSS_Content_Size:
-            html_content = html_content[:RSS_Content_Size] + "..."
+        #if len(html_content) > RSS_Content_Size:
+            #html_content = html_content[:RSS_Content_Size] + "..."
         art["content"] = html_content
     return recent_arts
 
@@ -108,6 +121,7 @@ def get_all_articles():
         art = ArticleConfig.loads(art_path)
         art = asdict(art)
         art["id"] = art_path.stem
+        art["path"] = art_path
         arts.append(art)
     return arts
 
@@ -223,6 +237,10 @@ def render_article_html(
         prev_art_cfg : ArticleConfig = None,
 ):
     if replace_or_not(art_cfg, blog_cfg):
+        # add prefix before relative image path
+        md_text = md_text.replace("](./", f"]({blog_cfg.img_prefix}")
+        md_text = md_text.replace("](pics/", f"]({blog_cfg.img_prefix}pics/")
+        md_text = md_text.replace("](../output/pics/", f"]({blog_cfg.img_prefix}pics/")
         for pair in art_cfg.pairs:
             md_text = md_text.replace(pair[0], pair[1], 1)
 

@@ -73,6 +73,7 @@ class BlogConfig:
     rss_updated      : str   # 上次生成 RSS feed 的时间
     blog_updated     : str   # 博客更新日期，如果大于 rss_updated 就要重新生成 RSS
     auto_replace     : bool  # 是否执行自动替换
+    img_prefix       : str   # 图片地址前缀
     img_max_width    : str   # HTML中的图片的最大宽度
     current_theme    : str   # 当前主题 (CSS)
 
@@ -89,6 +90,7 @@ class BlogConfig:
             rss_updated      = "",
             blog_updated     = now(),
             auto_replace     = True,
+            img_prefix       = "",
             img_max_width    = "100%",
             current_theme    = "simple",
         )

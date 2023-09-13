@@ -28,12 +28,22 @@
   <span>Updated at {{ art.mtime[0:19] }}</span>
 </div>
 
+<style>
+.left { float: left; }
+.right { float: right; }
+</style>
+
 {% if art.prev %}
-<a href="{{ art.prev.id }}.html">Previous: {{ art.prev.title }}</a>
+<div class="left">
+  <a href="{{ art.prev.id }}.html">Previous: {{ art.prev.title }}</a>
+</div>
 {% endif %}
 {% if art.next %}
-<a href="{{ art.next.id }}.html">Next: {{ art.next.title }}</a>
+<div class="right">
+  <a href="{{ art.next.id }}.html">Next: {{ art.next.title }}</a>
+</div>
 {% endif %}
+<div style="clear: both;"></div>
 {% endblock %}
 
 {% block footer %}

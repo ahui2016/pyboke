@@ -301,12 +301,19 @@ def render_all_articles(blog_cfg: BlogConfig, force: bool):
     deleted_count = delete_articles(all_md_files)
 
     updated_articles = 0
+    created_articles = 0
     for md_file in all_md_files:
-        err, need_to_render = add_or_update_article(md_file, blog_cfg, force)
+        err, need_to_render, new_toml_created = add_or_update_article(md_file, blog_cfg, force)
         if err:
             return err
         if need_to_render:
             updated_articles += 1
+        if new_toml_created:
+            created_articles += 1
+    if created_articles + deleted_count > 0:
+        print(f"总共发现 {created_articles} 篇新文章，删除 {deleted_count} 篇文章，需要重新渲染全部文章以重新排序。")
+        for md_file in all_md_files:
+            err, need_to_render, new_toml_created = add_or_update_article(md_file, blog_cfg, force=True)
 
     if force or deleted_count + updated_articles > 0:
         blog_updated_at_now(blog_cfg)
@@ -331,7 +338,7 @@ def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     """
     :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
     """
-    err, need_to_render = add_or_update_article(md_file, blog_cfg, force)
+    err, need_to_render, new_toml_created = add_or_update_article(md_file, blog_cfg, force)
 
     if err:
         return err
@@ -363,8 +370,6 @@ def preview_article(md_file: Path, blog_cfg: BlogConfig):
 def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     """
     在渲染全部文章时，本函数处理其中一个文件。
-    在第一次渲染全部文章时，get_all_articles() 无法获取完整文章列表
-    因此无法获取 next_art_cfg 和 prev_art_cfg，需要在渲染全部文章后再次渲染全部文章。
 
     :return: 发生错误时返回 (str, None), 否则反回 (None, need_to_render)
     """
@@ -372,16 +377,18 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     art_cfg_new, err = ArticleConfig.from_md_file(
         md_file, md_file_data, blog_cfg.title_length_max)
     if err:
-        return err, False
+        return err, False, False
 
     art_toml_path = art_cfg_path_from_md_path(md_file)
     need_to_render = False
+    new_toml_created = False
 
     # article toml 不存在，以 art_cfg_new 为准
     if not art_toml_path.exists():
         print(f"发现新文章: {art_cfg_new.title}")
         art_cfg = art_cfg_new
         need_to_render = True
+        new_toml_created = True
     else:
         # article toml 存在，以 art_toml_path 的文件内容为准
         art_cfg = ArticleConfig.loads(art_toml_path)
@@ -410,7 +417,7 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
                             next_art_cfg=find_next_article(art_cfg, all_arts=get_all_articles()),
                             prev_art_cfg=find_prev_article(art_cfg, all_arts=get_all_articles())) 
 
-    return None, need_to_render
+    return None, need_to_render, new_toml_created
 
 
 def art_cfg_path_from_md_path(md_path):

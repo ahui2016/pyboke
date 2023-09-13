@@ -25,7 +25,8 @@
 {{ art.content|safe }}
 
 <div id="updated-at">
-  <span>Updated at {{ art.mtime[0:19] }}</span>
+  <span>Updated at {{ art.mtime[0:19] }}</span><br>
+  <span>Created at {{ art.ctime[0:19] }}</span>
 </div>
 
 <style>

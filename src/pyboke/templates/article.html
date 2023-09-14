@@ -25,8 +25,26 @@
 {{ art.content|safe }}
 
 <div id="updated-at">
-  <span>Updated at {{ art.mtime[0:19] }}</span>
+  <span>Updated at {{ art.mtime[0:19] }}</span><br>
+  <span>Created at {{ art.ctime[0:19] }}</span>
 </div>
+
+<style>
+.left { float: left; }
+.right { float: right; }
+</style>
+
+{% if art.prev %}
+<div class="left">
+  <a href="{{ art.prev.id }}.html">Previous: {{ art.prev.title }}</a>
+</div>
+{% endif %}
+{% if art.next %}
+<div class="right">
+  <a href="{{ art.next.id }}.html">Next: {{ art.next.title }}</a>
+</div>
+{% endif %}
+<div style="clear: both;"></div>
 {% endblock %}
 
 {% block footer %}
@@ -47,7 +65,7 @@
     {% endif %}
     | LICENSE <a href="LICENSE.txt">CC0-1.0</a>
     | RSS <a href="atom.xml">atom.xml</a>
-    | Powered by <a href="https://github.com/ahui2016/pyboke">pyboke</a>
+    | Powered by <a href="https://github.com/ahui2016/pyboke">PyBoke</a>
   </p>
 </div>
 {% endblock %}

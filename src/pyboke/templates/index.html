@@ -8,8 +8,11 @@
 <h3>Recent articles</h3>
 <ul>
   {% for art in articles %}
-  <li>{{ art.ctime[:10] }}
-    <a href="{{art.id}}.html">{{art.title}}</a></li>
+  <li>
+    <a href="{{art.id}}.html">{{art.title}}</a>
+    <span style="float: right; font-size: 0.8em; color: #888;">{{ art.ctime[:10] }}</span>
+    <p style="clear: both;">{{ art.abstract }}</p>
+  </li>
   {% endfor %}
 </ul>
 
@@ -30,7 +33,7 @@
     Author: {{ blog.author }}
     | LICENSE <a href="LICENSE.txt">CC0-1.0</a>
     | RSS <a href="atom.xml">atom.xml</a>
-    | Powered by <a href="https://github.com/ahui2016/pyboke">pyboke</a>
+    | Powered by <a href="https://github.com/ahui2016/pyboke">PyBoke</a>
   </p>
 </div>
 {% endblock %}

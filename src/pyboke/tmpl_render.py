@@ -34,6 +34,21 @@ tmplfile = dict(
     rss         = RSS_Atom_XML,
 )
 
+def find_next_article(art: ArticleConfig, all_arts):
+    """根据ctime找到下一篇文章"""
+    all_arts = ignore_articles(all_arts)
+    all_arts = sort_articles(all_arts, key="ctime")
+    for i, a in enumerate(all_arts):
+        if a['ctime'] == art.ctime and a['title'] == art.title:
+            return all_arts[i+1] if i+1 < len(all_arts) else None
+
+def find_prev_article(art: ArticleConfig, all_arts):
+    """根据ctime找到上一篇文章"""
+    all_arts = ignore_articles(all_arts)
+    all_arts = sort_articles(all_arts, key="ctime")
+    for i, a in enumerate(all_arts):
+        if a['ctime'] == art.ctime and a['title'] == art.title:
+            return all_arts[i-1] if i-1 >= 0 else None
 
 def render_blog_config(cfg):
     tmpl = jinja_env.get_template(tmplfile["blog_cfg"])
@@ -50,7 +65,7 @@ def blog_updated_at_now(cfg):
 
 def render_rss(all_articles, cfg, force):
     if cfg.blog_updated > cfg.rss_updated or force:
-        rss_arts = get_rss_articles(all_articles)
+        rss_arts = get_rss_articles(all_articles, cfg)
         really_render_rss(rss_arts, cfg, force)
 
 
@@ -66,7 +81,10 @@ def really_render_rss(articles, blog_cfg, force):
     render_blog_config(blog_cfg)
 
 
-def get_rss_articles(all_articles):
+def get_rss_articles(
+        all_articles,
+        blog_cfg: BlogConfig
+    ):
     """
     按文章的修改时间排列。
     all_articles 是一个 dict, 已经有 id, 详见 get_all_articles()
@@ -74,13 +92,23 @@ def get_rss_articles(all_articles):
     sorted_articles = sort_articles(all_articles, key="mtime")
     recent_arts = get_recent_articles(sorted_articles, RSS_Entries_Max)
     for art in recent_arts:
+        art_cfg = ArticleConfig.loads(art_cfg_path_from_md_path(art["path"]))
         md_file = Articles_Folder_Path.joinpath(f"{art['id']}{MD_Suffix}")
         md_content = md_file.read_text(encoding="utf-8")
         # 删除第一行的标题
         md_content = "\n".join(md_content.split("\n")[1:])
+
+        if replace_or_not(art_cfg, blog_cfg):
+        # add prefix before relative image path
+            md_content = md_content.replace("](./", f"]({blog_cfg.img_prefix}")
+            md_content = md_content.replace("](pics/", f"]({blog_cfg.img_prefix}pics/")
+            md_content = md_content.replace("](../output/pics/", f"]({blog_cfg.img_prefix}pics/")
+            for pair in art_cfg.pairs:
+                md_text = md_text.replace(pair[0], pair[1], 1)
+
         html_content = markdown.markdown(md_content)
-        if len(html_content) > RSS_Content_Size:
-            html_content = html_content[:RSS_Content_Size] + "..."
+        #if len(html_content) > RSS_Content_Size:
+            #html_content = html_content[:RSS_Content_Size] + "..."
         art["content"] = html_content
     return recent_arts
 
@@ -93,6 +121,7 @@ def get_all_articles():
         art = ArticleConfig.loads(art_path)
         art = asdict(art)
         art["id"] = art_path.stem
+        art["path"] = art_path
         arts.append(art)
     return arts
 
@@ -204,8 +233,14 @@ def render_article_html(
         md_text : str,
         blog_cfg: BlogConfig,
         art_cfg : ArticleConfig,
+        next_art_cfg : ArticleConfig = None,
+        prev_art_cfg : ArticleConfig = None,
 ):
     if replace_or_not(art_cfg, blog_cfg):
+        # add prefix before relative image path
+        md_text = md_text.replace("](./", f"]({blog_cfg.img_prefix}")
+        md_text = md_text.replace("](pics/", f"]({blog_cfg.img_prefix}pics/")
+        md_text = md_text.replace("](../output/pics/", f"]({blog_cfg.img_prefix}pics/")
         for pair in art_cfg.pairs:
             md_text = md_text.replace(pair[0], pair[1], 1)
 
@@ -213,6 +248,10 @@ def render_article_html(
     index_id = art["title"][:Title_Index_Length].encode().hex()
     art["index_id"] = f"i{index_id}"
     art["content"] = mistune.html(md_text)
+    if next_art_cfg:
+        art["next"] = next_art_cfg
+    if prev_art_cfg:
+        art["prev"] = prev_art_cfg
     render_write_html(
         "article", dict(blog=blog_cfg, art=art, parent_dir=""), html_path)
 
@@ -262,12 +301,19 @@ def render_all_articles(blog_cfg: BlogConfig, force: bool):
     deleted_count = delete_articles(all_md_files)
 
     updated_articles = 0
+    created_articles = 0
     for md_file in all_md_files:
-        err, need_to_render = add_or_update_article(md_file, blog_cfg, force)
+        err, need_to_render, new_toml_created = add_or_update_article(md_file, blog_cfg, force)
         if err:
             return err
         if need_to_render:
             updated_articles += 1
+        if new_toml_created:
+            created_articles += 1
+    if created_articles + deleted_count > 0:
+        print(f"总共发现 {created_articles} 篇新文章，删除 {deleted_count} 篇文章，需要重新渲染全部文章以重新排序。")
+        for md_file in all_md_files:
+            err, need_to_render, new_toml_created = add_or_update_article(md_file, blog_cfg, force=True)
 
     if force or deleted_count + updated_articles > 0:
         blog_updated_at_now(blog_cfg)
@@ -292,7 +338,7 @@ def render_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     """
     :return: 发生错误时返回 err_msg: str, 没有错误则返回 False 或空字符串。
     """
-    err, need_to_render = add_or_update_article(md_file, blog_cfg, force)
+    err, need_to_render, new_toml_created = add_or_update_article(md_file, blog_cfg, force)
 
     if err:
         return err
@@ -316,7 +362,9 @@ def preview_article(md_file: Path, blog_cfg: BlogConfig):
             return err
 
     art_cfg.mtime = model.now()
-    render_article_html(Temp_HTML_Path, md_data.decode(), blog_cfg, art_cfg)
+    render_article_html(Temp_HTML_Path, md_data.decode(), blog_cfg, art_cfg, 
+                        next_art_cfg=find_next_article(art_cfg,all_arts=get_all_articles()), 
+                        prev_art_cfg=find_prev_article(art_cfg, all_arts=get_all_articles()))
 
 
 def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
@@ -329,26 +377,29 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
     art_cfg_new, err = ArticleConfig.from_md_file(
         md_file, md_file_data, blog_cfg.title_length_max)
     if err:
-        return err, False
+        return err, False, False
 
     art_toml_path = art_cfg_path_from_md_path(md_file)
     need_to_render = False
+    new_toml_created = False
 
     # article toml 不存在，以 art_cfg_new 为准
     if not art_toml_path.exists():
         print(f"发现新文章: {art_cfg_new.title}")
         art_cfg = art_cfg_new
         need_to_render = True
+        new_toml_created = True
     else:
         # article toml 存在，以 art_toml_path 的文件内容为准
         art_cfg = ArticleConfig.loads(art_toml_path)
 
-        # 文章内容发生了变化，自动更新 title, checksum, mtime
+        # 文章内容发生了变化，自动更新 title, checksum, mtime, abstract
         if art_cfg.checksum != art_cfg_new.checksum:
             print(f"更新: {art_cfg_new.title}")
             art_cfg.title = art_cfg_new.title
             art_cfg.checksum = art_cfg_new.checksum
             art_cfg.mtime = model.now()
+            art_cfg.abstract = art_cfg_new.abstract
             need_to_render = True
 
     # 文章内容有变化，需要渲染 toml
@@ -358,12 +409,15 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
         print(f"render and write {art_toml_path}")
         art_toml_path.write_text(art_toml_data, encoding="utf-8")
 
+    all_arts = get_all_articles()
     # 需要渲染 html
     if need_to_render or force:
         html_path = html_path_from_md_path(md_file)
-        render_article_html(html_path, md_file_data.decode(), blog_cfg, art_cfg)
+        render_article_html(html_path, md_file_data.decode(), blog_cfg, art_cfg, 
+                            next_art_cfg=find_next_article(art_cfg, all_arts=get_all_articles()),
+                            prev_art_cfg=find_prev_article(art_cfg, all_arts=get_all_articles())) 
 
-    return None, need_to_render
+    return None, need_to_render, new_toml_created
 
 
 def art_cfg_path_from_md_path(md_path):

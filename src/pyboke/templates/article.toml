@@ -40,3 +40,5 @@ pairs = [
 {% endfor %}
 ]
 
+# 文章摘要
+abstract = '''{{art.abstract}}'''

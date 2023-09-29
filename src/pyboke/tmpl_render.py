@@ -399,7 +399,7 @@ def add_or_update_article(md_file: Path, blog_cfg: BlogConfig, force: bool):
             art_cfg.title = art_cfg_new.title
             art_cfg.checksum = art_cfg_new.checksum
             art_cfg.mtime = model.now()
-            art_cfg.abstract = art_cfg_new.abstract
+            #art_cfg.abstract = art_cfg_new.abstract
             need_to_render = True
 
     # 文章内容有变化，需要渲染 toml

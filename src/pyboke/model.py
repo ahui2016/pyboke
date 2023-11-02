@@ -114,6 +114,7 @@ class ArticleConfig:
     replace   : int   # 是否执行自动替换 (0:跟随总设定, -1:不执行, 1:执行)
     pairs     : list  # 自动替换（主要用于替换图片地址）
     abstract  : str   # 文章摘要 (留空表示自动生成)
+    summary   : str   # 文章总结 (留空表示无总结), 手动填写的总结会出现在文章页首
 
     """其中, pairs 用 TOML 描述如下：
     pairs =  [
@@ -148,6 +149,7 @@ class ArticleConfig:
             replace   = 0,
             pairs     = [],
             abstract  = abstract,
+            summary   = "",
         )
         return art_cfg, None
 

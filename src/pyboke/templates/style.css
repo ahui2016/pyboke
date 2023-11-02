@@ -1,3 +1,35 @@
+.post-ai {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ai-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.ai-title-text {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.ai-explanation {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #666;
+}
+
+.ai-explanation-content {
+  margin-top: 10px;
+}
+
+
 header {
   text-align: center;
 }

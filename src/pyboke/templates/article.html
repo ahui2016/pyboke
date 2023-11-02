@@ -22,6 +22,18 @@
 
 {% block main %}
 
+{% if art.summary %}
+<div class="post-ai">
+    <div class="ai-title">
+        <div class="ai-title-text">Summary</div>
+    </div>
+
+    <div class="ai-explanation ai-explanation-content">
+        {{ art.summary }}
+    </div>
+</div>
+{% endif %}
+
 {{ art.content|safe }}
 
 <div id="updated-at">

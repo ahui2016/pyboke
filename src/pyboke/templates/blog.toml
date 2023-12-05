@@ -15,6 +15,10 @@ title_length_max = {{cfg.title_length_max}}
 # 是否执行自动替换 (true/false)
 auto_replace = {{cfg.auto_replace|string|lower}}
 
+# 图片地址前缀，用于替换文章中的图片地址，如果你把图片放在 output/pics 上传到了 GitHub Pages，可以把这个值设置为你的 GitHub Pages 地址
+# 例如输入 "https://xxx.github.io/" 将会把文章中的 "pics/xxx.png", "../output/pics/xxx.png", "./pics" 替换为 "https://xxx.github.io/pics/xxx.png"
+img_prefix = '''{{cfg.img_prefix}}'''
+
 # HTML中的图片的最大宽度
 img_max_width = '{{cfg.img_max_width}}'
 

@@ -1,4 +1,6 @@
 .idea
+.python-version
 env
 src/pyboke/__pycache__/
 dist/
+

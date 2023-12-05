@@ -40,3 +40,8 @@ pairs = [
 {% endfor %}
 ]
 
+# 文章预览，自动生成，后续可手动修改，会出现在 index 页面
+abstract = '''{{art.abstract}}'''
+
+#  文章总结 (留空表示无总结)，需手动填写，总结会出现在文章页首
+summary = '''{{art.summary}}'''

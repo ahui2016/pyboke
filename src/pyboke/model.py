@@ -2,6 +2,8 @@ import hashlib
 import re
 from dataclasses import dataclass, asdict
 from pathlib import Path
+import markdown 
+from bs4 import BeautifulSoup
 
 import arrow
 import tomli
@@ -71,6 +73,7 @@ class BlogConfig:
     rss_updated      : str   # 上次生成 RSS feed 的时间
     blog_updated     : str   # 博客更新日期，如果大于 rss_updated 就要重新生成 RSS
     auto_replace     : bool  # 是否执行自动替换
+    img_prefix       : str   # 图片地址前缀
     img_max_width    : str   # HTML中的图片的最大宽度
     current_theme    : str   # 当前主题 (CSS)
 
@@ -87,6 +90,7 @@ class BlogConfig:
             rss_updated      = "",
             blog_updated     = now(),
             auto_replace     = True,
+            img_prefix       = "",
             img_max_width    = "100%",
             current_theme    = "simple",
         )
@@ -109,6 +113,8 @@ class ArticleConfig:
     img_width : str   # HTML中的图片的最大宽度 (留空表示跟随总设定)
     replace   : int   # 是否执行自动替换 (0:跟随总设定, -1:不执行, 1:执行)
     pairs     : list  # 自动替换（主要用于替换图片地址）
+    abstract  : str   # 文章摘要 (留空表示自动生成)
+    summary   : str   # 文章总结 (留空表示无总结), 手动填写的总结会出现在文章页首
 
     """其中, pairs 用 TOML 描述如下：
     pairs =  [
@@ -126,6 +132,7 @@ class ArticleConfig:
         first_line  = get_first_line(md_str)
         checksum    = hashlib.sha1(file_data).hexdigest()
         ctime       = now()
+        abstract    = get_abstract(md_str, RSS_Content_Size) 
 
         title = get_md_title(first_line, title_length)
         if not title:
@@ -141,6 +148,8 @@ class ArticleConfig:
             img_width = "",
             replace   = 0,
             pairs     = [],
+            abstract  = abstract,
+            summary   = "",
         )
         return art_cfg, None
 
@@ -232,3 +241,23 @@ def get_md_title(md_first_line: str, max_bytes: int) -> str:
         title = md_title[0][1].strip()
 
     return utf8_byte_truncate(title, max_bytes).strip()
+
+def md_to_text(md):
+    html = markdown.markdown(md)
+    soup = BeautifulSoup(html, features='html.parser')
+    return soup.get_text()
+
+def get_abstract(md_str: str, max_bytes=RSS_Content_Size):
+    """
+    :param md_str: Markdown 文本
+    :param max_bytes: 摘要长度上限，单位: bytes
+    """
+    md_str = md_str.strip()
+    if not md_str:
+        return ""
+    # 删除标题
+    md_str = Markdown_Title_Pattern.sub("", md_str, count=1)
+
+    plain_text = md_to_text(md_str)
+
+    return utf8_byte_truncate(plain_text, max_bytes).strip()+"..."
